@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="fr" class="scroll-smooth dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ayoub Bensassi | Smooth Creative Portfolio</title>
+    <title>Ayoub Bensassi | Développeur Web Full Stack</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter & Space Grotesk -->
@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js Library for 3D Visual Constellation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -39,11 +41,21 @@
                         'spin-slow': 'spin 12s linear infinite',
                         'float': 'float 6s ease-in-out infinite',
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'gemini-gradient': 'geminiGlow 8s ease infinite',
+                        'cosmic-drift': 'cosmicDrift 20s ease-in-out infinite alternate',
                     },
                     keyframes: {
                         float: {
                             '0%, 100%': { transform: 'translateY(0px)' },
                             '50%': { transform: 'translateY(-15px)' },
+                        },
+                        geminiGlow: {
+                            '0%, 100%': { 'background-position': '0% 50%' },
+                            '50%': { 'background-position': '100% 50%' },
+                        },
+                        cosmicDrift: {
+                            '0%': { 'background-position': '0% 0%', 'filter': 'hue-rotate(0deg)' },
+                            '100%': { 'background-position': '100% 100%', 'filter': 'hue-rotate(360deg)' },
                         }
                     }
                 }
@@ -54,17 +66,24 @@
         body {
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
         /* Custom Smooth Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
         ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-track {
             background: #0f172a;
         }
         ::-webkit-scrollbar-thumb {
-            background: #334155;
+            background: #cbd5e1;
             border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #8b5cf6;
@@ -94,11 +113,38 @@
             transition: width 0.2s, height 0.2s, background-color 0.2s;
             mix-blend-mode: difference;
         }
-        .hover-target:hover ~ #custom-cursor {
-            width: 50px;
-            height: 50px;
-            background-color: rgba(139, 92, 246, 0.3);
-            border-color: transparent;
+
+        /* */
+        /* Cosmic Imagination Mode Overrides */
+        .imagination-active {
+            background: radial-gradient(circle at 50% 50%, #03001e, #7303c0, #ec38bc, #090a0f);
+            background-size: 300% 300%;
+            animation: cosmicDrift 25s easeinfinite alternate;
+            color: #ffffff;
+        }
+        .imagination-active .bg-white,
+        .imagination-active .bg-slate-50,
+        .imagination-active .bg-slate-100 {
+            background-color: rgba(15, 10, 36, 0.45) !important;
+            backdrop-filter: blur(12px);
+            border-color: rgba(236, 72, 153, 0.2) !important;
+            color: #f1f5f9 !important;
+        }
+        .imagination-active h1,
+        .imagination-active h2,
+        .imagination-active h3 {
+            color: #ffffff !important;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5), 0 0 20px rgba(236, 72, 153, 0.3);
+        }
+        .imagination-active .text-slate-600,
+        .imagination-active .text-slate-700 {
+            color: #cbd5e1 !important;
+        }
+
+        /* Gemini Animated Glowing mesh */
+        .gemini-gradient-bg {
+            background: linear-gradient(-45deg, #a855f7, #6366f1, #3b82f6, #06b6d4, #ec4899);
+            background-size: 400% 400%;
         }
 
         /* Hide cursor on mobile devices */
@@ -109,180 +155,250 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased selection:bg-primary-500 selection:text-white">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-primary-500 selection:text-white transition-colors duration-300">
 
     <!-- Custom Cursor -->
     <div id="custom-cursor" class="hidden md:block"></div>
 
+    <!-- -->
+    <!-- Stardust Imagination Canvas -->
+    <canvas id="stardust-canvas" class="fixed inset-0 pointer-events-none z-50 opacity-0 transition-opacity duration-500"></canvas>
+
     <!-- Navigation -->
-    <header class="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-slate-950/70 border-b border-slate-900 transition-all duration-300" id="header">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <a href="#hero" class="hover-target font-display text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-pink">
+    <header class="fixed top-0 left-0 w-full z-40 backdrop-blur-md bg-white/80 dark:bg-slate-950/80 border-b border-slate-200/80 dark:border-slate-900/80 transition-all duration-300" id="header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <a href="#hero" class="hover-target font-display text-lg sm:text-xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-pink whitespace-nowrap flex-shrink-0">
                 AYOUB.BENSASSI
             </a>
             
             <!-- Desktop Nav Links -->
-            <nav class="hidden md:flex items-center space-x-8">
-                <a href="#about" class="hover-target text-slate-300 hover:text-white transition font-medium text-sm">About</a>
-                <a href="#skills" class="hover-target text-slate-300 hover:text-white transition font-medium text-sm">Skills</a>
-                <a href="#portfolio" class="hover-target text-slate-300 hover:text-white transition font-medium text-sm">Works</a>
-                <a href="#experience" class="hover-target text-slate-300 hover:text-white transition font-medium text-sm">Journey</a>
-                <a href="#contact" class="hover-target text-slate-300 hover:text-white transition font-medium text-sm">Contact</a>
+            <nav class="hidden lg:flex items-center gap-6 xl:gap-8 bg-slate-100/65 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 px-6 py-2 rounded-full backdrop-blur-sm">
+                <a href="#about" class="hover-target text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 transition font-medium text-xs tracking-wider uppercase">À propos</a>
+                <a href="#skills" class="hover-target text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 transition font-medium text-xs tracking-wider uppercase">Analytiques</a>
+                <a href="#portfolio" class="hover-target text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 transition font-medium text-xs tracking-wider uppercase">Projets</a>
+                <a href="#experience" class="hover-target text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 transition font-medium text-xs tracking-wider uppercase">Parcours</a>
+                <a href="#playground" class="hover-target text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 transition font-medium text-xs tracking-wider uppercase">Playground</a>
+                <a href="#contact" class="hover-target text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 transition font-medium text-xs tracking-wider uppercase">Contact</a>
             </nav>
 
-            <!-- CTA Desktop -->
-            <div class="hidden md:block">
-                <a href="#contact" class="hover-target bg-gradient-to-r from-primary-600 to-accent-pink text-white px-5 py-2.5 rounded-full text-sm font-medium hover:shadow-lg hover:shadow-primary-600/30 transition duration-300 flex items-center gap-2">
-                    Let's Chat <i class="fa-solid fa-arrow-right text-xs"></i>
+            <!-- Actions Desktop -->
+            <div class="hidden lg:flex items-center gap-3 flex-shrink-0">
+                <!-- -->
+                <!-- Magic Cosmic Imagination Toggle -->
+                <button onclick="toggleImaginationMode()" class="hover-target text-purple-600 hover:text-pink-500 dark:text-purple-400 dark:hover:text-pink-300 w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center transition bg-slate-50/50 dark:bg-slate-900/30 hover:border-purple-500/30 relative group" aria-label="Toggle Imagination Mode">
+                    <i id="imagination-icon" class="fa-solid fa-wand-magic-sparkles animate-pulse"></i>
+                    <span class="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-slate-950 text-[8px] text-white py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-bold tracking-widest uppercase">Mode Rêve</span>
+                </button>
+
+                <!-- Theme Mode Toggle -->
+                <button onclick="toggleTheme()" class="hover-target text-slate-500 hover:text-primary-500 dark:text-slate-400 dark:hover:text-primary-400 w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center transition bg-slate-50/50 dark:bg-slate-900/30 hover:border-primary-500/30" aria-label="Toggle Theme">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- CMD + K Indicator button -->
+                <button onclick="toggleCommandPalette()" class="hover-target text-[10px] tracking-widest font-semibold text-slate-500 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 px-3 py-2.5 rounded-full flex items-center gap-1.5 hover:border-primary-500/30 transition">
+                    <span class="font-sans">RECHERCHE</span> <span class="font-mono bg-slate-200 dark:bg-slate-950 px-1.5 py-0.5 rounded text-[9px] border border-slate-300 dark:border-slate-800">⌘K</span>
+                </button>
+
+                <a href="#contact" class="hover-target bg-gradient-to-r from-primary-600 to-accent-pink text-white px-5 py-2.5 rounded-full text-xs tracking-wider uppercase font-bold hover:shadow-lg hover:shadow-primary-600/20 transition duration-300 flex items-center gap-2 whitespace-nowrap">
+                    Discutons ! <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </a>
             </div>
 
-            <!-- Mobile Menu Toggle Button -->
-            <button class="md:hidden text-slate-100 focus:outline-none" id="mobile-toggle" aria-label="Toggle Menu">
-                <i class="fa-solid fa-bars text-2xl" id="menu-icon"></i>
-            </button>
+            <!-- Mobile Menu Actions -->
+            <div class="flex items-center gap-2 lg:hidden flex-shrink-0">
+                <button onclick="toggleImaginationMode()" class="text-purple-600 dark:text-purple-400 w-9 h-9 rounded-full border border-slate-200/60 dark:border-slate-800/60 flex items-center justify-center bg-slate-100/55 dark:bg-slate-900/40" aria-label="Toggle Imagination Mode">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                </button>
+                <button onclick="toggleTheme()" class="text-slate-500 dark:text-slate-400 hover:text-primary-500 w-9 h-9 rounded-full border border-slate-200/60 dark:border-slate-800/60 flex items-center justify-center bg-slate-100/55 dark:bg-slate-900/40" aria-label="Toggle Theme">
+                    <i id="theme-icon-mobile" class="fa-solid fa-moon"></i>
+                </button>
+                <button class="text-slate-900 dark:text-white w-9 h-9 rounded-full border border-slate-200/60 dark:border-slate-800/60 flex items-center justify-center bg-slate-100/55 dark:bg-slate-900/40 focus:outline-none" id="mobile-toggle" aria-label="Toggle Menu">
+                    <i class="fa-solid fa-bars text-sm" id="menu-icon"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Mobile Drawer -->
-        <div class="hidden md:hidden fixed inset-x-0 top-20 bg-slate-950 border-b border-slate-900 transition-all duration-300 z-40 shadow-xl" id="mobile-menu">
-            <div class="px-6 py-8 flex flex-col space-y-6">
-                <a href="#about" class="text-lg text-slate-300 hover:text-white font-medium" onclick="toggleMenu()">About</a>
-                <a href="#skills" class="text-lg text-slate-300 hover:text-white font-medium" onclick="toggleMenu()">Skills</a>
-                <a href="#portfolio" class="text-lg text-slate-300 hover:text-white font-medium" onclick="toggleMenu()">Works</a>
-                <a href="#experience" class="text-lg text-slate-300 hover:text-white font-medium" onclick="toggleMenu()">Journey</a>
-                <a href="#contact" class="text-lg text-slate-300 hover:text-white font-medium" onclick="toggleMenu()">Contact</a>
-                <a href="#contact" class="bg-gradient-to-r from-primary-600 to-accent-pink text-white text-center py-3 rounded-xl font-medium" onclick="toggleMenu()">Get In Touch</a>
+        <div class="hidden lg:hidden fixed inset-x-0 top-16 bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg border-b border-slate-200 dark:border-slate-900 transition-all duration-300 z-40 shadow-xl" id="mobile-menu">
+            <div class="px-6 py-8 flex flex-col space-y-4">
+                <a href="#about" class="text-base text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 font-semibold tracking-wide uppercase" onclick="toggleMenu()">À propos</a>
+                <a href="#skills" class="text-base text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 font-semibold tracking-wide uppercase" onclick="toggleMenu()">Analytiques</a>
+                <a href="#portfolio" class="text-base text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 font-semibold tracking-wide uppercase" onclick="toggleMenu()">Projets</a>
+                <a href="#experience" class="text-base text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 font-semibold tracking-wide uppercase" onclick="toggleMenu()">Parcours</a>
+                <a href="#playground" class="text-base text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 font-semibold tracking-wide uppercase" onclick="toggleMenu()">Playground</a>
+                <a href="#contact" class="text-base text-slate-600 hover:text-primary-500 dark:text-slate-300 dark:hover:text-primary-400 font-semibold tracking-wide uppercase" onclick="toggleMenu()">Contact</a>
+                <button onclick="toggleCommandPalette(); toggleMenu();" class="text-left text-base text-primary-500 font-bold uppercase tracking-wide">Recherche (⌘K)</button>
+                <a href="#contact" class="bg-gradient-to-r from-primary-600 to-accent-pink text-white text-center py-3 rounded-full font-bold uppercase tracking-wide text-xs" onclick="toggleMenu()">Me contacter</a>
             </div>
         </div>
     </header>
+
+    <!-- Command Palette (Cmd + K Overlay) -->
+    <div id="command-palette" class="hidden fixed inset-0 z-50 bg-slate-900/40 dark:bg-slate-950/80 backdrop-blur-sm flex items-start justify-center pt-[10vh] px-4">
+        <div class="w-full max-w-xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+            <!-- Search Bar -->
+            <div class="flex items-center gap-3 px-4 py-4 border-b border-slate-200 dark:border-slate-800">
+                <i class="fa-solid fa-magnifying-glass text-slate-500 text-lg"></i>
+                <input type="text" id="palette-search" placeholder="Tapez une commande ou une section..." class="w-full bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none text-base" oninput="searchCommands()">
+                <button onclick="toggleCommandPalette()" class="text-xs text-slate-500 bg-slate-100 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded">ESC</button>
+            </div>
+            <!-- Interactive Command list -->
+            <div class="max-h-80 overflow-y-auto p-2 space-y-1" id="palette-results">
+                <div class="text-xs font-semibold text-slate-400 px-3 py-2 uppercase tracking-wider">Navigation</div>
+                <button onclick="runCommand('nav-about')" class="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-primary-600/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition text-sm">
+                    <span><i class="fa-solid fa-user-ninja w-6 text-primary-500"></i> Aller à la section À propos</span>
+                    <span class="text-xs text-slate-400">Sauter</span>
+                </button>
+                <button onclick="runCommand('nav-skills')" class="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-primary-600/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition text-sm">
+                    <span><i class="fa-solid fa-sliders w-6 text-accent-pink"></i> Aller aux Graphiques Analytiques</span>
+                    <span class="text-xs text-slate-400">Sauter</span>
+                </button>
+                <button onclick="runCommand('nav-works')" class="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-primary-600/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition text-sm">
+                    <span><i class="fa-solid fa-folder-open w-6 text-accent-cyan"></i> Aller aux Projets</span>
+                    <span class="text-xs text-slate-400">Sauter</span>
+                </button>
+                <button onclick="runCommand('nav-playground')" class="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-primary-600/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition text-sm">
+                    <span><i class="fa-solid fa-gamepad w-6 text-emerald-500"></i> Lancer le Playground (Jeux)</span>
+                    <span class="text-xs text-slate-400">Sauter</span>
+                </button>
+                
+                <div class="text-xs font-semibold text-slate-400 px-3 py-2 pt-4 uppercase tracking-wider">Système</div>
+                <button onclick="runCommand('toggle-theme')" class="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-primary-600/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition text-sm">
+                    <span><i class="fa-solid fa-circle-half-stroke w-6 text-yellow-500"></i> Basculer le mode sombre/clair</span>
+                    <span class="text-xs text-slate-400">Thème</span>
+                </button>
+                <button onclick="runCommand('trigger-chat')" class="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-primary-600/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition text-sm">
+                    <span><i class="fa-solid fa-robot w-6 text-emerald-400"></i> Ouvrir l'assistant IA</span>
+                    <span class="text-xs text-slate-400">Chat</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section id="hero" class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
         <!-- Radial Decorative Gradients -->
         <div class="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-primary-600/10 blur-[100px] animate-pulse-slow"></div>
         <div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-accent-pink/10 blur-[120px] animate-pulse-slow"></div>
+        <div class="absolute top-0 right-0 w-[450px] h-[450px] rounded-full opacity-10 blur-[150px] gemini-gradient-bg animate-gemini-gradient"></div>
 
         <div class="max-w-7xl mx-auto px-6 w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <!-- Hero Info (Left side) -->
             <div class="lg:col-span-7 flex flex-col space-y-6 text-center lg:text-left">
-                <div class="inline-flex items-center gap-2 self-center lg:self-start px-4 py-1.5 rounded-full bg-slate-900/80 border border-slate-800 text-slate-400 text-sm">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span>Available for contract & full-time roles</span>
+                <div class="inline-flex items-center gap-2 self-center lg:self-start px-4 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-sm shadow-md">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                    </span>
+                    <span class="flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-wand-magic-sparkles text-indigo-500 text-xs animate-pulse"></i>
+                        Génération IA active & d'Avant-garde
+                    </span>
                 </div>
                 
-                <h1 class="font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-                    Crafting <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 via-accent-pink to-accent-cyan">Silky Smooth</span> Digital Realities
+                <h1 class="font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] text-slate-900 dark:text-white">
+                    Création d'Applications <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 via-accent-pink to-accent-cyan">Web Modernes</span>
                 </h1>
                 
-                <p class="text-slate-400 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                    Hello, I'm AYOUB. A Full-Stack Creative Developer specializing in premium interactive interfaces, smooth motion systems, and scalable modern web architectures.
+                <p class="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                    Bonjour, je suis <span class="font-semibold text-slate-900 dark:text-white">Ayoub Bensassi</span>. Technicien spécialisé en développement web full-stack, j'implémente des interfaces fluides, esthétiques et des architectures logicielles fiables.
                 </p>
 
                 <!-- Actions -->
                 <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
-                    <a href="#portfolio" class="hover-target w-full sm:w-auto text-center bg-white text-slate-950 px-8 py-4 rounded-full font-semibold hover:bg-slate-200 hover:shadow-xl hover:shadow-white/5 transition duration-300">
-                        Explore Works
+                    <a href="#portfolio" class="hover-target w-full sm:w-auto text-center bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-8 py-4 rounded-full font-semibold hover:bg-slate-800 dark:hover:bg-slate-200 hover:shadow-xl transition duration-300">
+                        Explorer mes travaux
                     </a>
-                    <a href="#contact" class="hover-target w-full sm:w-auto text-center bg-slate-900 text-slate-100 border border-slate-800 px-8 py-4 rounded-full font-semibold hover:bg-slate-800/80 transition duration-300">
-                        Let's Talk
+                    <a href="#playground" class="hover-target w-full sm:w-auto text-center bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-full font-semibold hover:shadow-xl transition duration-300">
+                        <i class="fa-solid fa-gamepad mr-2"></i> Faire une partie
                     </a>
                 </div>
 
-                <!-- Stats Counters -->
-                <div class="grid grid-cols-3 gap-6 pt-10 border-t border-slate-900 max-w-md mx-auto lg:mx-0">
-                    <div>
-                        <p class="font-display text-2xl sm:text-3xl font-bold text-white">5+</p>
-                        <p class="text-xs sm:text-sm text-slate-500">Years Experience</p>
+                <!-- Live Smart Vitals Widget -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-slate-200 dark:border-slate-900">
+                    <div class="p-3 bg-slate-100 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800/50">
+                        <div class="text-[10px] uppercase font-bold text-slate-400">Heure de Casablanca</div>
+                        <div id="vitals-time" class="text-sm font-semibold text-slate-900 dark:text-white font-mono">00:00:00 GMT+1</div>
                     </div>
-                    <div>
-                        <p class="font-display text-2xl sm:text-3xl font-bold text-white">40+</p>
-                        <p class="text-xs sm:text-sm text-slate-500">Completed Projects</p>
+                    <div class="p-3 bg-slate-100 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800/50">
+                        <div class="text-[10px] uppercase font-bold text-slate-400">Statut IA</div>
+                        <div class="text-sm font-semibold text-emerald-500 font-mono flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Gemini Pro Online
+                        </div>
                     </div>
-                    <div>
-                        <p class="font-display text-2xl sm:text-3xl font-bold text-white">99%</p>
-                        <p class="text-xs sm:text-sm text-slate-500">Happy Clients</p>
+                    <div class="p-3 bg-slate-100 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800/50">
+                        <div class="text-[10px] uppercase font-bold text-slate-400">Spécialité</div>
+                        <div class="text-sm font-semibold text-primary-500 font-mono">Full Stack</div>
+                    </div>
+                    <div class="p-3 bg-slate-100 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800/50">
+                        <div class="text-[10px] uppercase font-bold text-slate-400">Moteur Cognitive</div>
+                        <div class="text-sm font-semibold text-accent-cyan font-mono">Claude-Style</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Hero Graphic (Right side) -->
+            <!-- Hero Graphic (Right side) - Ultra Designed Mouse Interactive 3D Constellation -->
             <div class="lg:col-span-5 relative flex justify-center">
-                <div class="relative w-72 h-72 sm:w-96 sm:h-96 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden animate-float">
-                    <!-- Tech Stack Orbit circles -->
-                    <div class="absolute inset-0 border border-slate-800/40 rounded-full scale-[0.8] animate-spin-slow">
-                        <div class="absolute -top-3 left-1/2 w-8 h-8 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center text-primary-500"><i class="fa-brands fa-react text-xs"></i></div>
-                        <div class="absolute -bottom-3 left-1/2 w-8 h-8 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center text-accent-cyan"><i class="fa-brands fa-css3-alt text-xs"></i></div>
+                <div class="relative w-80 h-80 sm:w-[420px] sm:h-[420px] rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden shadow-2xl backdrop-blur-md">
+                    <!-- Three.js Render Target Canvas -->
+                    <canvas id="cognitive-canvas" class="absolute inset-0 w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+                    
+                    <!-- Futuristic Graphic Overlay HUD -->
+                    <div class="absolute inset-x-4 top-4 flex justify-between items-center pointer-events-none select-none z-10">
+                        <div class="bg-slate-900/85 backdrop-blur-md px-3 py-1 rounded-full border border-primary-500/30 text-[9px] text-primary-400 font-mono tracking-widest uppercase flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 bg-primary-500 rounded-full animate-ping"></span> Core 3D Actif
+                        </div>
+                        <div class="text-[9px] font-mono text-slate-500 dark:text-slate-400 bg-white/90 dark:bg-slate-950/80 px-2 py-1 rounded border border-slate-200/50 dark:border-slate-800">
+                            Friction: 0.15 | Res: 1080p
+                        </div>
                     </div>
 
-                    <!-- Glowing center graphic representing dynamic canvas -->
-                    <div class="w-48 h-48 rounded-full bg-gradient-to-tr from-primary-600 to-accent-pink blur-[40px] opacity-40"></div>
-                    
-                    <!-- Avatar / Symbolic Illustration -->
-                    <div class="absolute inset-4 rounded-2xl bg-slate-950 border border-slate-800/60 overflow-hidden flex flex-col items-center justify-center p-6 text-center">
-                        <div class="w-24 h-24 rounded-full bg-slate-900 border-2 border-primary-500 p-1 mb-4 flex items-center justify-center">
-                            <!-- High quality SVG avatar -->
-                            <svg class="w-full h-full text-slate-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
+                    <div class="absolute inset-x-4 bottom-4 pointer-events-none select-none z-10 bg-slate-950/85 border border-slate-800/80 rounded-xl p-3 flex justify-between items-center">
+                        <div class="space-y-0.5">
+                            <span class="block text-[8px] uppercase tracking-widest text-slate-500 font-bold">Matrice de rendu</span>
+                            <span id="canvas-interaction-hint" class="block text-[10px] text-indigo-400 font-bold">Glissez pour pivoter la caméra</span>
                         </div>
-                        <h3 class="font-display text-xl font-bold text-white">AYOUB BENSASSI</h3>
-                        <p class="text-xs text-primary-500 font-medium tracking-widest uppercase mt-1">Creative Technologist</p>
-                        
-                        <div class="flex space-x-3 mt-4 text-slate-400">
-                            <span class="hover-target hover:text-white transition cursor-pointer"><i class="fa-brands fa-github"></i></span>
-                            <span class="hover-target hover:text-white transition cursor-pointer"><i class="fa-brands fa-linkedin"></i></span>
-                            <span class="hover-target hover:text-white transition cursor-pointer"><i class="fa-brands fa-dribbble"></i></span>
-                        </div>
+                        <i class="fa-solid fa-arrows-spin text-indigo-400 text-sm animate-spin-slow"></i>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Scroll down indicator -->
-        <a href="#about" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2 text-slate-500 hover:text-white transition duration-300">
-            <span class="text-xs tracking-widest uppercase font-medium">Scroll</span>
-            <div class="w-[20px] h-[35px] rounded-full border border-slate-700 flex justify-center p-1">
+        <a href="#about" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition duration-300">
+            <span class="text-xs tracking-widest uppercase font-medium">Défiler</span>
+            <div class="w-[20px] h-[35px] rounded-full border border-slate-300 dark:border-slate-700 flex justify-center p-1">
                 <div class="w-1 h-2 rounded-full bg-primary-500 animate-bounce"></div>
             </div>
         </a>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-32 bg-slate-950 relative">
+    <section id="about" class="py-32 relative">
         <div class="max-w-7xl mx-auto px-6 reveal">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
                 <!-- Left Details Info -->
                 <div class="lg:col-span-5 flex flex-col space-y-6">
-                    <span class="text-primary-500 text-sm font-semibold tracking-wider uppercase">My Background</span>
-                    <h2 class="font-display text-3xl sm:text-4xl font-bold text-white leading-tight">
-                        Fusing Clean Engineering With Artistic Layouts
+                    <span class="text-primary-500 text-sm font-semibold tracking-wider uppercase">Mon Profil</span>
+                    <h2 class="font-display text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white leading-tight">
+                        Faire converger la logique applicative et l'ergonomie utilisateur
                     </h2>
-                    <p class="text-slate-400 leading-relaxed">
-                        I believe that design and engineering should coexist in seamless harmony. As a hybrid professional, I balance clean, semantic web architecture with delightful design logic that captivates audiences.
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Diplômé en tant que <span class="font-semibold text-slate-900 dark:text-white">Technicien Spécialisé en Développement Web Full Stack</span> à l'ISTA, j'ai acquis une solide expérience pratique dans la conception d'architectures web, d'interfaces utilisateur interactives et de systèmes de gestion de données.
                     </p>
-                    <p class="text-slate-400 leading-relaxed">
-                        Whether it is micro-interactions, canvas-based particle environments, responsive component trees, or secure API pipelines—I engineer with attention to performance, speed, and standard aesthetics.
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Mon parcours professionnel m'a également permis d'acquérir une rigueur exceptionnelle en gestion de base de données (Label'Vie) et en logistique applicative complexe (Joël Robuchon), me rendant hautement structuré et polyvalent.
                     </p>
 
-                    <!-- Interactive Features Card list -->
-                    <div class="space-y-4 pt-4">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-primary-500 flex-shrink-0">
-                                <i class="fa-solid fa-code"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-white font-semibold text-base">Clean Modern Engineering</h4>
-                                <p class="text-sm text-slate-500">Reusable components structured for high performance scaling.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-accent-pink flex-shrink-0">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-white font-semibold text-base">Delightful Motion Design</h4>
-                                <p class="text-sm text-slate-500">Micro-animations built to guide and enrich user behaviors.</p>
-                            </div>
+                    <!-- Languages Widget -->
+                    <div class="pt-4 border-t border-slate-200 dark:border-slate-900">
+                        <h4 class="text-slate-900 dark:text-white font-semibold text-sm mb-3">Langues parlées :</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary-500/10 text-primary-500 border border-primary-500/20">Arabe (Langue Maternelle)</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-accent-pink/10 text-accent-pink border border-accent-pink/20">Français (Intermédiaire)</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20">Anglais (Débutant)</span>
                         </div>
                     </div>
                 </div>
@@ -290,38 +406,38 @@
                 <!-- Right Visual Grid -->
                 <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <!-- About Card 1 -->
-                    <div class="bg-slate-900/40 border border-slate-900 p-8 rounded-3xl hover:border-slate-800 transition duration-300">
-                        <i class="fa-solid fa-layer-group text-3xl text-primary-500 mb-6"></i>
-                        <h3 class="font-display text-xl font-bold text-white mb-3">Front-End UX</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">
-                            React.js, Next.js, HTML5, Tailwind CSS, Smooth UI systems, GSAP, and advanced state libraries.
+                    <div class="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-8 rounded-3xl hover:border-slate-300 dark:hover:border-slate-800 transition duration-300">
+                        <i class="fa-solid fa-code text-3xl text-primary-500 mb-6"></i>
+                        <h3 class="font-display text-xl font-bold text-slate-900 dark:text-white mb-3">Front-End UX</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            Création d'interfaces élégantes avec HTML5, CSS3, JavaScript moderne, React.js et intégration de responsive design impeccable.
                         </p>
                     </div>
 
                     <!-- About Card 2 -->
-                    <div class="bg-slate-900/40 border border-slate-900 p-8 rounded-3xl hover:border-slate-800 transition duration-300">
+                    <div class="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-8 rounded-3xl hover:border-slate-300 dark:hover:border-slate-800 transition duration-300">
                         <i class="fa-solid fa-server text-3xl text-accent-pink mb-6"></i>
-                        <h3 class="font-display text-xl font-bold text-white mb-3">Back-End Logic</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">
-                            Node.js, Express, Python (FastAPI/Flask), PostgreSQL, Redis, RESTful API and WebSockets architectures.
+                        <h3 class="font-display text-xl font-bold text-slate-900 dark:text-white mb-3">Back-End & APIs</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            Développement de logique métier robuste et d'APIs REST en utilisant Laravel, PHP et de requêtes efficaces sous MySQL.
                         </p>
                     </div>
 
                     <!-- About Card 3 -->
-                    <div class="bg-slate-900/40 border border-slate-900 p-8 rounded-3xl hover:border-slate-800 transition duration-300">
-                        <i class="fa-solid fa-bezier-curve text-3xl text-accent-cyan mb-6"></i>
-                        <h3 class="font-display text-xl font-bold text-white mb-3">Interactive Design</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">
-                            Figma prototyping, layout mapping, motion assets design, wireframing, and interactive brand design.
+                    <div class="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-8 rounded-3xl hover:border-slate-300 dark:hover:border-slate-800 transition duration-300">
+                        <i class="fa-solid fa-database text-3xl text-accent-cyan mb-6"></i>
+                        <h3 class="font-display text-xl font-bold text-slate-900 dark:text-white mb-3">Gestion de Données</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            Mise à jour et structuration de bases relationnelles volumineuses, contrôle de cohérence et paramétrage d'assortiments.
                         </p>
                     </div>
 
                     <!-- About Card 4 -->
-                    <div class="bg-slate-900/40 border border-slate-900 p-8 rounded-3xl hover:border-slate-800 transition duration-300">
-                        <i class="fa-solid fa-rocket text-3xl text-yellow-500 mb-6"></i>
-                        <h3 class="font-display text-xl font-bold text-white mb-3">Cloud & DevOps</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">
-                            Docker, AWS deployments, CI/CD automated test integrations, Vercel structures, and security audits.
+                    <div class="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-8 rounded-3xl hover:border-slate-300 dark:hover:border-slate-800 transition duration-300">
+                        <i class="fa-brands fa-git-alt text-3xl text-yellow-500 mb-6"></i>
+                        <h3 class="font-display text-xl font-bold text-slate-900 dark:text-white mb-3">Versionnage & CI</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            Gestion propre des repositories, collaboration via Git et GitHub, respect des standards de release.
                         </p>
                     </div>
                 </div>
@@ -329,75 +445,150 @@
         </div>
     </section>
 
-    <!-- Skills Meter / Showcase -->
-    <section id="skills" class="py-24 bg-slate-900/30 border-y border-slate-900 relative">
+    <!-- Skills & Visual Analytics Dashboard Section -->
+    <section id="skills" class="py-28 bg-slate-100 dark:bg-slate-900/30 border-y border-slate-200 dark:border-slate-900/80 relative">
         <div class="max-w-7xl mx-auto px-6 reveal">
             <div class="text-center max-w-2xl mx-auto mb-16">
-                <span class="text-accent-pink text-sm font-semibold tracking-wider uppercase">My Arsenal</span>
-                <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mt-2">Technical Strengths</h2>
-                <p class="text-slate-400 mt-4">Continuously sharpening skills to stay on the bleeding edge of software craftsmanship.</p>
+                <span class="text-accent-pink text-sm font-semibold tracking-wider uppercase">Mon Arsenal</span>
+                <h2 class="font-display text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mt-2">Forces Techniques & Analytiques</h2>
+                <p class="text-slate-600 dark:text-slate-400 mt-4">Un tableau de bord interactif visualisant mes niveaux de maîtrise et mes allocations de stack.</p>
             </div>
 
-            <!-- Skill bars & percentages -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-                <!-- Skill 1 -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center text-sm font-medium">
-                        <span class="text-white">JavaScript / TypeScript</span>
-                        <span class="text-primary-500">95%</span>
+            <!-- Ultra Designed Grid Dashboard Dashboard -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-6xl mx-auto items-stretch">
+                <!-- Left: Master Radial Gauges and Core Engine Skills (8 columns) -->
+                <div class="lg:col-span-8 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 sm:p-8 flex flex-col justify-between">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-5 mb-6">
+                        <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-primary-500 animate-pulse"></i> Taux d'Affinité Technologique
+                        </h3>
+                        <span class="text-[10px] uppercase font-mono font-bold tracking-widest text-slate-400">Flux: Actif</span>
                     </div>
-                    <div class="h-2 bg-slate-900 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-primary-600 to-accent-pink rounded-full" style="width: 95%"></div>
+
+                    <!-- Skills Slider bars upgraded with modern designs -->
+                    <div class="space-y-6">
+                        <!-- Skill Bar 1 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                <span class="flex items-center gap-2"><i class="fa-brands fa-react text-primary-500"></i> React.js / UX Modulaire</span>
+                                <span class="text-primary-500 font-bold font-mono">92%</span>
+                            </div>
+                            <div class="h-3 bg-slate-100 dark:bg-slate-950/80 rounded-full p-0.5 border border-slate-200/50 dark:border-slate-800">
+                                <div class="h-full bg-gradient-to-r from-primary-600 via-indigo-600 to-accent-cyan rounded-full animate-pulse" style="width: 92%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Skill Bar 2 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                <span class="flex items-center gap-2"><i class="fa-brands fa-laravel text-accent-pink"></i> PHP & Laravel APIs</span>
+                                <span class="text-accent-pink font-bold font-mono">87%</span>
+                            </div>
+                            <div class="h-3 bg-slate-100 dark:bg-slate-950/80 rounded-full p-0.5 border border-slate-200/50 dark:border-slate-800">
+                                <div class="h-full bg-gradient-to-r from-accent-pink to-primary-500 rounded-full animate-pulse" style="width: 87%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Skill Bar 3 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                <span class="flex items-center gap-2"><i class="fa-solid fa-database text-accent-cyan"></i> MySQL & Modélisation relationnelle</span>
+                                <span class="text-accent-cyan font-bold font-mono">90%</span>
+                            </div>
+                            <div class="h-3 bg-slate-100 dark:bg-slate-950/80 rounded-full p-0.5 border border-slate-200/50 dark:border-slate-800">
+                                <div class="h-full bg-gradient-to-r from-accent-cyan via-emerald-500 to-indigo-500 rounded-full animate-pulse" style="width: 90%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Skill Bar 4 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                <span class="flex items-center gap-2"><i class="fa-brands fa-git-alt text-yellow-500"></i> Versionnage Git / GitHub CI-CD</span>
+                                <span class="text-yellow-500 font-bold font-mono">85%</span>
+                            </div>
+                            <div class="h-3 bg-slate-100 dark:bg-slate-950/80 rounded-full p-0.5 border border-slate-200/50 dark:border-slate-800">
+                                <div class="h-full bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full animate-pulse" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Visual Area: Custom SVG dynamic Line graph portraying code activity levels -->
+                    <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-850">
+                        <span class="block text-[10px] uppercase font-bold text-slate-400 mb-3 tracking-wider">Activité d'écriture de Code (Index d'efficacité)</span>
+                        <div class="bg-slate-50 dark:bg-slate-950/50 border border-slate-200/60 dark:border-slate-850 p-4 rounded-2xl relative">
+                            <!-- SVG Polyline graph -->
+                            <svg class="w-full h-24 overflow-visible" viewBox="0 0 500 100" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="gradient-chart" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.4" />
+                                        <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Area beneath the line -->
+                                <path d="M0,100 L0,80 L50,60 L100,85 L150,40 L200,75 L250,20 L300,55 L350,15 L400,60 L450,25 L500,5 C 500,5 500,100 500,100 Z" fill="url(#gradient-chart)"></path>
+                                <!-- Stroke Line -->
+                                <polyline fill="none" stroke="#8b5cf6" stroke-width="3" points="0,80 50,60 100,85 150,40 200,75 250,20 300,55 350,15 400,60 450,25 500,5" stroke-linecap="round"></polyline>
+                                <!-- Decorative nodes -->
+                                <circle cx="250" cy="20" r="5" fill="#ec4899" class="animate-pulse"></circle>
+                                <circle cx="350" cy="15" r="5" fill="#06b6d4" class="animate-pulse"></circle>
+                                <circle cx="500" cy="5" r="5" fill="#8b5cf6" class="animate-pulse"></circle>
+                            </svg>
+                            <!-- X Axis labels -->
+                            <div class="flex justify-between items-center text-[9px] font-mono text-slate-400 mt-2">
+                                <span>Lun</span>
+                                <span>Mar</span>
+                                <span>Mer</span>
+                                <span>Jeu</span>
+                                <span>Ven</span>
+                                <span>Sam</span>
+                                <span>Dim (Aujourd'hui)</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- Skill 2 -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center text-sm font-medium">
-                        <span class="text-white">React & Next.js Ecosystem</span>
-                        <span class="text-primary-500">92%</span>
+
+                <!-- Right: Modular Dashboard Cards (4 columns) -->
+                <div class="lg:col-span-4 flex flex-col gap-6">
+                    <!-- Gauge 1: Database Supervision Performance Metrics -->
+                    <div class="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl flex flex-col justify-between items-center text-center">
+                        <span class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-2">Supervision BDD (Label'Vie)</span>
+                        
+                        <!-- Mini Circle Graph representation -->
+                        <div class="relative w-28 h-28 flex items-center justify-center my-3">
+                            <svg class="absolute w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-slate-100 dark:text-slate-800" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="text-accent-cyan" stroke-dasharray="95, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="flex flex-col items-center justify-center font-display">
+                                <span class="text-2xl font-bold text-slate-900 dark:text-white">95%</span>
+                                <span class="text-[8px] font-bold text-slate-400 uppercase">Qualité</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-2">
+                            Cohérence absolue des grilles tarifaires et paramétrages des articles gérés dans le système Label'Vie.
+                        </p>
                     </div>
-                    <div class="h-2 bg-slate-900 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-primary-600 to-accent-pink rounded-full" style="width: 92%"></div>
-                    </div>
-                </div>
-                <!-- Skill 3 -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center text-sm font-medium">
-                        <span class="text-white">Tailwind CSS & Styling Frameworks</span>
-                        <span class="text-primary-500">98%</span>
-                    </div>
-                    <div class="h-2 bg-slate-900 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-primary-600 to-accent-pink rounded-full" style="width: 98%"></div>
-                    </div>
-                </div>
-                <!-- Skill 4 -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center text-sm font-medium">
-                        <span class="text-white">Backend Engineering (Node / Python)</span>
-                        <span class="text-primary-500">85%</span>
-                    </div>
-                    <div class="h-2 bg-slate-900 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-primary-600 to-accent-pink rounded-full" style="width: 85%"></div>
-                    </div>
-                </div>
-                <!-- Skill 5 -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center text-sm font-medium">
-                        <span class="text-white">Relational & NoSQL Databases</span>
-                        <span class="text-primary-500">80%</span>
-                    </div>
-                    <div class="h-2 bg-slate-900 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-primary-600 to-accent-pink rounded-full" style="width: 80%"></div>
-                    </div>
-                </div>
-                <!-- Skill 6 -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center text-sm font-medium">
-                        <span class="text-white">UI/UX Design Systems (Figma)</span>
-                        <span class="text-primary-500">88%</span>
-                    </div>
-                    <div class="h-2 bg-slate-900 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-primary-600 to-accent-pink rounded-full" style="width: 88%"></div>
+
+                    <!-- Gauge 2: Inventory Optimization Accuracy metrics -->
+                    <div class="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl flex flex-col justify-between items-center text-center flex-1">
+                        <span class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-2">Logistique & Stocks (J. Robuchon)</span>
+
+                        <!-- Mini Circle Graph representation -->
+                        <div class="relative w-28 h-28 flex items-center justify-center my-3">
+                            <svg class="absolute w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-slate-100 dark:text-slate-800" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="text-accent-pink" stroke-dasharray="98, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="flex flex-col items-center justify-center font-display">
+                                <span class="text-2xl font-bold text-slate-900 dark:text-white">98%</span>
+                                <span class="text-[8px] font-bold text-slate-400 uppercase">Précision</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-2">
+                            Gestion des flux d'approvisionnement et réduction des écarts d'inventaire lors des distributions de stock.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -405,28 +596,28 @@
     </section>
 
     <!-- Portfolio Section -->
-    <section id="portfolio" class="py-32 bg-slate-950 relative">
+    <section id="portfolio" class="py-32 relative">
         <div class="max-w-7xl mx-auto px-6 reveal">
             <!-- Header & Filters -->
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
                 <div>
-                    <span class="text-primary-500 text-sm font-semibold tracking-wider uppercase">Recent Projects</span>
-                    <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mt-2">Latest Masterpieces</h2>
+                    <span class="text-primary-500 text-sm font-semibold tracking-wider uppercase">Mes Réalisations</span>
+                    <h2 class="font-display text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mt-2">Derniers Projets</h2>
                 </div>
                 <!-- Filter Tabs -->
                 <div class="flex flex-wrap gap-2">
-                    <button class="hover-target filter-btn active px-5 py-2.5 rounded-full text-sm font-medium bg-primary-600 text-white transition-all duration-300" onclick="filterProjects('all')">All</button>
-                    <button class="hover-target filter-btn px-5 py-2.5 rounded-full text-sm font-medium text-slate-400 hover:text-white transition-all duration-300" onclick="filterProjects('development')">Web Apps</button>
-                    <button class="hover-target filter-btn px-5 py-2.5 rounded-full text-sm font-medium text-slate-400 hover:text-white transition-all duration-300" onclick="filterProjects('design')">Creative</button>
+                    <button class="hover-target filter-btn active px-5 py-2.5 rounded-full text-sm font-medium bg-primary-600 text-white transition-all duration-300" onclick="filterProjects('all')">Tous</button>
+                    <button class="hover-target filter-btn px-5 py-2.5 rounded-full text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all duration-300" onclick="filterProjects('front')">Front-End / React</button>
+                    <button class="hover-target filter-btn px-5 py-2.5 rounded-full text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all duration-300" onclick="filterProjects('fullstack')">Full-Stack</button>
                 </div>
             </div>
 
             <!-- Portfolio Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="portfolio-grid">
-                <!-- Project 1 -->
-                <div class="portfolio-item development bg-slate-900 border border-slate-800/40 rounded-3xl overflow-hidden hover:border-slate-700/60 transition-all duration-300 group">
+                <!-- Project 1 (Interactive Front-End Web Application) -->
+                <div class="portfolio-item front bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/40 rounded-3xl overflow-hidden hover:border-slate-300 dark:hover:border-slate-700/60 transition-all duration-300 group">
                     <div class="relative overflow-hidden aspect-video bg-slate-950">
-                        <!-- Placeholder dynamic mockup preview representing web platform -->
+                        <!-- Simulated Mockup -->
                         <div class="absolute inset-0 flex items-center justify-center p-6 bg-gradient-to-tr from-indigo-900 to-slate-950">
                             <div class="w-full h-full rounded-xl border border-white/10 bg-slate-900/80 p-4 shadow-xl flex flex-col justify-between">
                                 <div class="flex items-center space-x-2">
@@ -448,23 +639,22 @@
                     </div>
                     <div class="p-6">
                         <div class="flex gap-2 mb-3">
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-800 text-primary-400">React.js</span>
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-800 text-accent-pink">Node.js</span>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-primary-500">React.js</span>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-accent-pink">UI/UX</span>
                         </div>
-                        <h3 class="font-display text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors">Vortex - SaaS Workspace</h3>
-                        <p class="text-slate-400 text-sm">A real-time workspace application with custom modular dashboards, calendar scheduling, and shared interactive canvases.</p>
+                        <h3 class="font-display text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary-400 transition-colors">Plateforme Web WIB</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">Développement d'interfaces modulaires en React.js, gestion réactive de l'état global et intégration de maquettes haute fidélité (Wib.co).</p>
                     </div>
                 </div>
 
-                <!-- Project 2 -->
-                <div class="portfolio-item design bg-slate-900 border border-slate-800/40 rounded-3xl overflow-hidden hover:border-slate-700/60 transition-all duration-300 group">
+                <!-- Project 2 (Full-Stack Stock/Inventory DB App) -->
+                <div class="portfolio-item fullstack bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/40 rounded-3xl overflow-hidden hover:border-slate-300 dark:hover:border-slate-700/60 transition-all duration-300 group">
                     <div class="relative overflow-hidden aspect-video bg-slate-950">
-                        <!-- Placeholder representing premium brand mockup design -->
                         <div class="absolute inset-0 flex items-center justify-center p-6 bg-gradient-to-tr from-pink-900 to-slate-950">
                             <div class="w-32 h-32 rounded-3xl bg-slate-900 border border-white/10 shadow-2xl flex flex-col items-center justify-center relative overflow-hidden">
                                 <div class="absolute -top-10 -right-10 w-24 h-24 bg-accent-pink rounded-full blur-[20px] opacity-60"></div>
-                                <span class="font-display font-bold text-3xl text-white">N</span>
-                                <span class="text-[8px] text-slate-500 uppercase tracking-widest mt-2">Nova Lab</span>
+                                <span class="font-display font-bold text-3xl text-white">DB</span>
+                                <span class="text-[8px] text-slate-500 uppercase tracking-widest mt-2">Laravel ERP</span>
                             </div>
                         </div>
                         <div class="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
@@ -473,24 +663,22 @@
                     </div>
                     <div class="p-6">
                         <div class="flex gap-2 mb-3">
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-800 text-accent-pink">Brand Design</span>
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-800 text-accent-cyan">Web Design</span>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-accent-pink">Laravel</span>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-accent-cyan">MySQL</span>
                         </div>
-                        <h3 class="font-display text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors">Nova Lab Brand Identity</h3>
-                        <p class="text-slate-400 text-sm">A high-fidelity minimalist modern web design layout and creative branding package for an progressive AI testing sandbox.</p>
+                        <h3 class="font-display text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary-400 transition-colors">ERP Logistique & Articles</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">Gestionnaire d'assortiments d'articles et de fiches fournisseurs avec requêtes d'achat/vente indexées sous MySQL.</p>
                     </div>
                 </div>
 
-                <!-- Project 3 -->
-                <div class="portfolio-item development bg-slate-900 border border-slate-800/40 rounded-3xl overflow-hidden hover:border-slate-700/60 transition-all duration-300 group">
+                <!-- Project 3 (Full Stack E-Commerce App) -->
+                <div class="portfolio-item fullstack bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/40 rounded-3xl overflow-hidden hover:border-slate-300 dark:hover:border-slate-700/60 transition-all duration-300 group">
                     <div class="relative overflow-hidden aspect-video bg-slate-950">
-                        <!-- Placeholder representing transactional graph dashboards -->
                         <div class="absolute inset-0 flex items-center justify-center p-6 bg-gradient-to-tr from-cyan-950 to-slate-950">
                             <div class="w-full h-full flex flex-col justify-end p-4 bg-slate-900/60 rounded-xl border border-white/5 space-y-4">
                                 <div class="flex items-end justify-between h-24 gap-2">
                                     <div class="w-full bg-accent-cyan/80 rounded-t h-[40%] animate-pulse"></div>
                                     <div class="w-full bg-accent-cyan/80 rounded-t h-[75%] animate-pulse"></div>
-                                    <div class="w-full bg-accent-cyan/80 rounded-t h-[55%] animate-pulse"></div>
                                     <div class="w-full bg-accent-cyan/80 rounded-t h-[90%] animate-pulse"></div>
                                 </div>
                                 <div class="h-2 w-1/3 bg-slate-700 rounded"></div>
@@ -503,11 +691,11 @@
                     </div>
                     <div class="p-6">
                         <div class="flex gap-2 mb-3">
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-800 text-accent-cyan">Next.js</span>
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-800 text-emerald-400">PostgreSQL</span>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-accent-cyan">PHP Laravel</span>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-emerald-500">TailwindCSS</span>
                         </div>
-                        <h3 class="font-display text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors">Minty - FinTech Dashboard</h3>
-                        <p class="text-slate-400 text-sm">Secure analytical dashboards tracking cryptocurrency and localized currency wallets with real-time updates.</p>
+                        <h3 class="font-display text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary-400 transition-colors">Plateforme Web E-Commerce</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">Application e-commerce complète développée en équipe, de l'élaboration de la base de données jusqu'à l'interface réactive.</p>
                     </div>
                 </div>
             </div>
@@ -515,148 +703,657 @@
     </section>
 
     <!-- Experience / Timeline Section -->
-    <section id="experience" class="py-24 bg-slate-900/20 border-t border-slate-900 relative">
+    <section id="experience" class="py-24 bg-slate-100/50 dark:bg-slate-900/20 border-t border-slate-200 dark:border-slate-900 relative">
         <div class="max-w-7xl mx-auto px-6 reveal">
-            <div class="text-center max-w-2xl mx-auto mb-20">
-                <span class="text-primary-500 text-sm font-semibold tracking-wider uppercase">My Journey</span>
-                <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mt-2">Work Experience</h2>
-            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                
+                <!-- Professional Experiences Column -->
+                <div>
+                    <div class="flex items-center gap-3 mb-10">
+                        <div class="w-10 h-10 rounded-xl bg-primary-600/10 text-primary-500 flex items-center justify-center text-lg"><i class="fa-solid fa-briefcase"></i></div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Expériences Professionnelles</h2>
+                    </div>
 
-            <!-- Vertical Timeline -->
-            <div class="relative border-l border-slate-800 max-w-3xl mx-auto pl-8 space-y-12">
-                <!-- Timeline Event 1 -->
-                <div class="relative">
-                    <div class="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-4 border-primary-500"></div>
-                    <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase">2024 - Present</span>
-                    <h3 class="font-display text-xl font-bold text-white mt-1">Lead Creative Engineer</h3>
-                    <h4 class="text-sm text-primary-500 font-medium mt-0.5">Zenith Digital Labs</h4>
-                    <p class="text-slate-400 text-sm mt-3 leading-relaxed">
-                        Spearheading architectural transitions towards micro-frontend systems in Next.js. Designing advanced reusable libraries, mentoring junior members, and standardizing aesthetic design rules.
-                    </p>
+                    <!-- Vertical Timeline -->
+                    <div class="relative border-l border-slate-200 dark:border-slate-800 pl-8 space-y-10">
+                        <!-- Timeline Event 1 -->
+                        <div class="relative">
+                            <div class="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-white dark:bg-slate-950 border-4 border-primary-500"></div>
+                            <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase font-mono">Octobre 2025 - Novembre 2025</span>
+                            <h3 class="font-display text-lg font-bold text-slate-900 dark:text-white mt-1">Gestionnaire du Stock</h3>
+                            <h4 class="text-sm text-primary-500 font-medium mt-0.5 font-display">Joël Robuchon International — Casablanca</h4>
+                            <ul class="text-slate-600 dark:text-slate-400 text-xs mt-3 list-disc pl-4 space-y-1">
+                                <li>Gestion et suivi précis des flux de stocks (entrées/sorties).</li>
+                                <li>Réception et contrôle de la conformité des livraisons fournisseurs.</li>
+                                <li>Préparation des prélèvements et participation active aux inventaires périodiques.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Timeline Event 2 -->
+                        <div class="relative">
+                            <div class="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-white dark:bg-slate-950 border-4 border-accent-pink"></div>
+                            <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase font-mono">Octobre 2024 - Juillet 2025</span>
+                            <h3 class="font-display text-lg font-bold text-slate-900 dark:text-white mt-1">Superviseur Base de Données</h3>
+                            <h4 class="text-sm text-accent-pink font-medium mt-0.5 font-display">Label'Vie — Casablanca</h4>
+                            <ul class="text-slate-600 dark:text-slate-400 text-xs mt-3 list-disc pl-4 space-y-1">
+                                <li>Saisie, administration et mise à jour structurée des données articles.</li>
+                                <li>Gestion dynamique des fiches fournisseurs et paramétrage des grilles de prix d'achat/vente.</li>
+                                <li>Contrôle qualité rigoureux et vérification de la cohérence globale du système.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Timeline Event 3 -->
+                        <div class="relative">
+                            <div class="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-white dark:bg-slate-950 border-4 border-accent-cyan"></div>
+                            <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase font-mono">Avril 2024 - Mai 2024</span>
+                            <h3 class="font-display text-lg font-bold text-slate-900 dark:text-white mt-1">Stagiaire en Développement Web</h3>
+                            <h4 class="text-sm text-accent-cyan font-medium mt-0.5 font-display">wib.co — Casablanca</h4>
+                            <ul class="text-slate-600 dark:text-slate-400 text-xs mt-3 list-disc pl-4 space-y-1">
+                                <li>Développement d'interfaces front-end modernes sous React.js.</li>
+                                <li>Création de composants UI modulaires hautement réutilisables.</li>
+                                <li>Intégration responsive et optimisation des maquettes d'expérience utilisateur.</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Timeline Event 2 -->
-                <div class="relative">
-                    <div class="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-4 border-accent-pink"></div>
-                    <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase">2022 - 2024</span>
-                    <h3 class="font-display text-xl font-bold text-white mt-1">Senior Full-Stack Engineer</h3>
-                    <h4 class="text-sm text-accent-pink font-medium mt-0.5">Aura Web Solutions</h4>
-                    <p class="text-slate-400 text-sm mt-3 leading-relaxed">
-                        Designed secure payment workflows, led migrations from legacy monolith setups to fast serverless paradigms, and optimized backend databases resulting in a 40% loading speed increase.
-                    </p>
+                <!-- Education & Academic Column -->
+                <div>
+                    <div class="flex items-center gap-3 mb-10">
+                        <div class="w-10 h-10 rounded-xl bg-accent-cyan/10 text-accent-cyan flex items-center justify-center text-lg"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Formation Scolaire</h2>
+                    </div>
+
+                    <div class="relative border-l border-slate-200 dark:border-slate-800 pl-8 space-y-10">
+                        <!-- Education 1 -->
+                        <div class="relative">
+                            <div class="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-white dark:bg-slate-950 border-4 border-accent-cyan"></div>
+                            <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase font-mono">2021 - 2023</span>
+                            <h3 class="font-display text-lg font-bold text-slate-900 dark:text-white mt-1">Technicien Spécialisé Full-Stack</h3>
+                            <h4 class="text-sm text-accent-cyan font-medium mt-0.5 font-display">ISTA — Casablanca</h4>
+                            <p class="text-slate-600 dark:text-slate-400 text-xs mt-3 leading-relaxed">
+                                Apprentissage approfondi de la création d'applications web du front-end au back-end, incluant la conception de bases de données, l'implémentation de logique applicative complexe et le responsive design.
+                            </p>
+                        </div>
+
+                        <!-- Education 2 -->
+                        <div class="relative">
+                            <div class="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-white dark:bg-slate-950 border-4 border-yellow-500"></div>
+                            <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase font-mono">2019</span>
+                            <h3 class="font-display text-lg font-bold text-slate-900 dark:text-white mt-1">Baccalauréat Scientifique</h3>
+                            <h4 class="text-sm text-yellow-500 font-medium mt-0.5 font-display">Lycée Ibn Toumert — Casablanca</h4>
+                            <p class="text-slate-600 dark:text-slate-400 text-xs mt-3 leading-relaxed">
+                                Option Sciences Physiques. Formation initiale rigoureuse axée sur les méthodes analytiques, la logique et la résolution de problèmes complexes.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Timeline Event 3 -->
-                <div class="relative">
-                    <div class="absolute -left-[41px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-4 border-accent-cyan"></div>
-                    <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase">2021 - 2022</span>
-                    <h3 class="font-display text-xl font-bold text-white mt-1">Frontend Developer</h3>
-                    <h4 class="text-sm text-accent-cyan font-medium mt-0.5">Pixel Creative Studio</h4>
-                    <p class="text-slate-400 text-sm mt-3 leading-relaxed">
-                        Developed semantic user-facing components, interactive layouts, and high-conversion landing pages using modern HTML, JavaScript ecosystems, CSS custom layouts, and automated UI tests.
-                    </p>
-                </div>
             </div>
         </div>
     </section>
 
+    <!-- Playground Section (Tic-Tac-Toe & AI Sandbox) -->
+    <section id="playground" class="py-32 relative bg-slate-50 dark:bg-slate-950 overflow-hidden">
+        <!-- Floating neon blur elements -->
+        <div class="absolute -top-12 -left-12 w-64 h-64 bg-indigo-600/10 dark:bg-indigo-600/5 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-12 -right-12 w-64 h-64 bg-cyan-600/10 dark:bg-cyan-600/5 rounded-full blur-3xl"></div>
+
+        <div class="max-w-7xl mx-auto px-6 reveal">
+            <div class="text-center max-w-2xl mx-auto mb-10">
+                <span class="text-indigo-500 text-sm font-semibold tracking-wider uppercase flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i> Espace Intelligent
+                </span>
+                <h2 class="font-display text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mt-2">Le Playground Interactif</h2>
+                <p class="text-slate-600 dark:text-slate-400 mt-4">Prenez une pause en défiant mon IA, essayez de générer des briques de code ou lancez des concepts oniriques.</p>
+            </div>
+
+            <!-- -->
+            <!-- Tab Selectors -->
+            <div class="flex justify-center mb-10">
+                <div class="inline-flex bg-slate-100 dark:bg-slate-900 p-1.5 rounded-full border border-slate-200/60 dark:border-slate-800/80 flex-wrap justify-center gap-1">
+                    <button onclick="switchPlaygroundTab('game-tab')" id="tab-game-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-850 text-slate-900 dark:text-white shadow">
+                        <i class="fa-solid fa-gamepad"></i> Morpion VS IA
+                    </button>
+                    <button onclick="switchPlaygroundTab('sandbox-tab')" id="tab-sandbox-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400">
+                        <i class="fa-solid fa-code"></i> AI Code Sandbox
+                    </button>
+                    <button onclick="switchPlaygroundTab('dream-tab')" id="tab-dream-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400">
+                        <i class="fa-solid fa-feather-pointed"></i> Laboratoire de Rêves
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: Tic-Tac-Toe (Morpion) Game Layout Grid -->
+            <div id="playground-game-content" class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-6 sm:p-8 rounded-3xl">
+                <!-- Game Settings & Scoreboard (Left) -->
+                <div class="md:col-span-5 flex flex-col space-y-6">
+                    <h3 class="font-display text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-yellow-500"></i> Scoreboard
+                    </h3>
+
+                    <!-- Score Cards -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-slate-100 dark:bg-slate-950/80 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800 text-center">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase">Joueur</div>
+                            <div id="score-player" class="text-xl font-bold text-primary-500 font-mono">0</div>
+                        </div>
+                        <div class="bg-slate-100 dark:bg-slate-950/80 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800 text-center">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase">Nul</div>
+                            <div id="score-ties" class="text-xl font-bold text-slate-500 font-mono">0</div>
+                        </div>
+                        <div class="bg-slate-100 dark:bg-slate-950/80 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800 text-center">
+                            <div id="score-opponent-title" class="text-[10px] font-bold text-slate-400 uppercase">IA</div>
+                            <div id="score-opponent" class="text-xl font-bold text-accent-pink font-mono">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Game Mode Controls -->
+                    <div class="space-y-3 pt-2">
+                        <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Mode de Jeu</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="mode-ai" onclick="setGameMode('ai')" class="hover-target flex items-center justify-center gap-2 py-2.5 rounded-xl border font-semibold text-xs uppercase tracking-wide transition-all duration-300 bg-primary-600 border-primary-500 text-white shadow-md">
+                                <i class="fa-solid fa-robot"></i> VS IA
+                            </button>
+                            <button id="mode-pvp" onclick="setGameMode('pvp')" class="hover-target flex items-center justify-center gap-2 py-2.5 rounded-xl border font-semibold text-xs uppercase tracking-wide transition-all duration-300 bg-transparent border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+                                <i class="fa-solid fa-users"></i> 2 Joueurs
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Difficulty Selection (Conditional for AI Mode) -->
+                    <div id="difficulty-wrapper" class="space-y-3">
+                        <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Difficulté de l'IA</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="diff-easy" onclick="setDifficulty('easy')" class="hover-target py-2 rounded-xl border font-semibold text-[10px] uppercase tracking-wide transition-all duration-300 bg-transparent border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+                                Facile
+                            </button>
+                            <button id="diff-smart" onclick="setDifficulty('smart')" class="hover-target py-2 rounded-xl border font-semibold text-[10px] uppercase tracking-wide transition-all duration-300 bg-primary-600 border-primary-500 text-white shadow-md">
+                                Intelligent
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Reset Board Button -->
+                    <button onclick="resetGameBoard(true)" class="hover-target w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition duration-300">
+                        <i class="fa-solid fa-rotate-right"></i> Réinitialiser la Partie
+                    </button>
+                </div>
+
+                <!-- Interactive Game Grid (Right) -->
+                <div class="md:col-span-7 flex flex-col items-center justify-center">
+                    <!-- Status Display Indicator -->
+                    <div id="game-status" class="mb-4 text-center font-display font-bold text-base tracking-wide text-slate-800 dark:text-white">
+                        C'est à votre tour ! (X)
+                    </div>
+
+                    <!-- 3x3 Grid Board -->
+                    <div class="grid grid-cols-3 gap-3 w-72 h-72 sm:w-80 sm:h-80 bg-slate-100 dark:bg-slate-950 p-3 rounded-2xl border border-slate-200 dark:border-slate-900 relative">
+                        <!-- Cell 0 -->
+                        <button onclick="makePlayerMove(0)" class="hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none" aria-label="Cell 0"></button>
+                        <!-- Cell 1 -->
+                        <button onclick="makePlayerMove(1)" class="hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none" aria-label="Cell 1"></button>
+                        <!-- Cell 2 -->
+                        <button onclick="makePlayerMove(2)" class="hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none" aria-label="Cell 2"></button>
+                        <!-- Cell 3 -->
+                        <button onclick="makePlayerMove(3)" class="hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none" aria-label="Cell 3"></button>
+                        <!-- Cell 4 -->
+                        <button onclick="makePlayerMove(4)" class="hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none" aria-label="Cell 4"></button>
+                        <!-- Cell 5 -->
+                        <button onclick="makePlayerMove(5)" class="hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none" aria-label="Cell 5"></button>
+                        <!-- Cell 6 -->
+                        <button onclick="makePlayerMove(6)" class="hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none" aria-label="Cell 6"></button>
+                        <!-- Cell 7 -->
+                        <button onclick="makePlayerMove(7)" class="hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none" aria-label="Cell 7"></button>
+                        <!-- Cell 8 -->
+                        <button onclick="makePlayerMove(8)" class="hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none" aria-label="Cell 8"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: AI Code Sandbox CONTENT (Initially Hidden) -->
+            <div id="playground-sandbox-content" class="hidden max-w-4xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+                    <div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-code text-indigo-500 animate-pulse"></i> Générateur de Code Gemini Pro
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Générez à la volée des blocs de code réutilisables basés sur l'expertise technique d'Ayoub.</p>
+                    </div>
+                    <!-- Controls and selectors -->
+                    <div id="sandbox-vitals" class="flex items-center gap-2.5">
+                        <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-emerald-500 font-mono">Modèle: Gemini-1.5-Flash</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+                    <!-- Prompts Selector Column -->
+                    <div class="md:col-span-4 flex flex-col gap-3">
+                        <span class="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Instructions Modèles</span>
+                        <button onclick="generateSandboxCode('api-laravel')" class="text-left p-3.5 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/60 hover:border-indigo-500 dark:hover:border-indigo-500 rounded-2xl transition duration-200 group flex flex-col gap-1 text-xs">
+                            <span class="font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-500">API Controller Laravel</span>
+                            <span class="text-[10px] text-slate-400">Générer un CRUD de base pour les articles Label'Vie.</span>
+                        </button>
+                        <button onclick="generateSandboxCode('react-hooks')" class="text-left p-3.5 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/60 hover:border-indigo-500 dark:hover:border-indigo-500 rounded-2xl transition duration-200 group flex flex-col gap-1 text-xs">
+                            <span class="font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-500">React State Handler Hook</span>
+                            <span class="text-[10px] text-slate-400">Créer un custom Hook pour synchroniser les stocks.</span>
+                        </button>
+                        <button onclick="generateSandboxCode('sql-schema')" class="text-left p-3.5 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/60 hover:border-indigo-500 dark:hover:border-indigo-500 rounded-2xl transition duration-200 group flex flex-col gap-1 text-xs">
+                            <span class="font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-500">Requêtes SQL Structurées</span>
+                            <span class="text-[10px] text-slate-400">Écrire une requête complexe d'analyse de stocks.</span>
+                        </button>
+                    </div>
+
+                    <!-- Sandbox Output Console Area -->
+                    <div class="md:col-span-8 bg-slate-950 border border-slate-900 rounded-2xl p-4 flex flex-col relative overflow-hidden min-h-[300px]">
+                        <!-- Top status bar -->
+                        <div class="flex items-center justify-between border-b border-slate-900 pb-3 mb-3 text-[10px] text-slate-400 font-mono">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                                <span id="sandbox-status-txt">En attente d'instructions...</span>
+                            </div>
+                            <!-- Copy button using manual clipboard override -->
+                            <button onclick="copySandboxCode()" class="hover:text-white transition flex items-center gap-1">
+                                <i class="fa-regular fa-copy"></i> Copier
+                            </button>
+                        </div>
+                        <!-- Live typewriting console output -->
+                        <div class="flex-1 font-mono text-[11px] leading-relaxed text-slate-300 whitespace-pre-wrap overflow-y-auto max-h-72" id="sandbox-code-terminal">
+# Appuyez sur un prompt de l'IA à gauche pour commencer le streaming de génération...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- -->
+            <!-- TAB 3: Dream Laboratory CONTENT (Initially Hidden) -->
+            <div id="playground-dream-content" class="hidden max-w-4xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+                    <div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-flask-vial text-pink-500 animate-bounce"></i> Laboratoire de Rêves Oniriques
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Générez des idées d'avant-garde nées d'une fusion entre logique de code et pure imagination.</p>
+                    </div>
+                    <button onclick="generateDreamConcept()" class="hover-target bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold py-2.5 px-5 rounded-full text-xs tracking-wider uppercase hover:shadow-lg transition flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Matérialiser un concept
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[320px]">
+                    <!-- Futuristic Visual Blueprint (Left) -->
+                    <div class="lg:col-span-5 bg-slate-950 border border-slate-900 rounded-2xl p-4 h-64 relative overflow-hidden flex items-center justify-center">
+                        <canvas id="dream-blueprint-canvas" class="absolute inset-0 w-full h-full opacity-70"></canvas>
+                        <div class="relative z-10 text-center pointer-events-none select-none">
+                            <span class="text-[9px] font-mono tracking-widest text-pink-500 uppercase block mb-1">Visualiseur Conceptuel</span>
+                            <span id="dream-blueprint-status" class="text-xs font-bold text-slate-400 font-mono">Génération Inactive</span>
+                        </div>
+                    </div>
+                    <!-- Detailed Spec Description (Right) -->
+                    <div class="lg:col-span-7 flex flex-col justify-between space-y-4 font-mono text-xs">
+                        <div class="p-4 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-850 rounded-2xl space-y-3">
+                            <div class="flex justify-between items-center text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2">
+                                <span class="font-bold text-[10px] uppercase tracking-wider">Concept Actif</span>
+                                <span id="dream-cat" class="text-pink-500 font-bold">[CONCEPT-00]</span>
+                            </div>
+                            <h4 id="dream-title" class="font-display font-bold text-base text-slate-900 dark:text-white">Prêt à rêver ?</h4>
+                            <p id="dream-desc" class="text-slate-600 dark:text-slate-300 leading-relaxed">
+                                Cliquez sur le bouton ci-dessus pour fusionner des algorithmes structurés avec une vision utopique et solarpunk de la technologie de demain.
+                            </p>
+                        </div>
+                        <!-- Micro Specs Grid -->
+                        <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
+                            <div class="bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <span class="block text-slate-400 uppercase font-bold text-[8px]">Marge d'Utopie</span>
+                                <span id="dream-stat-utopia" class="text-slate-900 dark:text-white font-bold text-xs font-mono">-</span>
+                            </div>
+                            <div class="bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <span class="block text-slate-400 uppercase font-bold text-[8px]">Débit d'Idées</span>
+                                <span id="dream-stat-throughput" class="text-slate-900 dark:text-white font-bold text-xs font-mono">-</span>
+                            </div>
+                            <div class="bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <span class="block text-slate-400 uppercase font-bold text-[8px]">Facteur Wow</span>
+                                <span id="dream-stat-wow" class="text-slate-900 dark:text-white font-bold text-xs font-mono">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
     <!-- Contact Section -->
-    <section id="contact" class="py-32 bg-slate-950 relative">
+    <section id="contact" class="py-32 relative">
         <div class="max-w-7xl mx-auto px-6 reveal">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
                 <!-- Info Section -->
                 <div class="lg:col-span-5 flex flex-col space-y-6">
-                    <span class="text-primary-500 text-sm font-semibold tracking-wider uppercase">Let's Connect</span>
-                    <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Let's Bring Your Concepts To Life</h2>
-                    <p class="text-slate-400 leading-relaxed">
-                        Interested in a collaboration, have questions, or just want to discuss innovative tech? Fill out the contact form, or reach out directly via channels below.
+                    <span class="text-primary-500 text-sm font-semibold tracking-wider uppercase">Contact</span>
+                    <h2 class="font-display text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white">Créons quelque chose de grand ensemble</h2>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Que ce soit pour un recrutement, une opportunité de freelance ou simplement pour discuter de technologies web modernes, n'hésitez pas à me joindre directement.
                     </p>
 
-                    <div class="space-y-4 pt-4 text-slate-300">
+                    <div class="space-y-4 pt-4 text-slate-700 dark:text-slate-300">
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-envelope text-primary-500 text-lg w-6"></i>
-                            <span>hello@AYOUBBENSASSI.io</span>
+                            <i class="fa-solid fa-envelope text-primary-500 text-lg w-6 flex-shrink-0"></i>
+                            <span class="font-mono text-sm">bensassiayoub02@gmail.com</span>
                         </div>
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-phone text-accent-pink text-lg w-6"></i>
-                            <span>+1 (555) 019-2831</span>
+                            <i class="fa-solid fa-phone text-accent-pink text-lg w-6 flex-shrink-0"></i>
+                            <span class="font-mono text-sm">+212 649-460762</span>
                         </div>
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-location-dot text-accent-cyan text-lg w-6"></i>
-                            <span>San Francisco, California</span>
+                            <i class="fa-brands fa-whatsapp text-emerald-500 text-lg w-6 flex-shrink-0"></i>
+                            <a href="https://wa.me/212649460762?text=Bonjour%20Ayoub!%20J'ai%20visité%20votre%20portfolio%20et%20souhaite%20en%20savoir%20plus%20sur%20vos%20services." target="_blank" class="hover-target text-slate-700 dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 font-medium transition duration-300 flex items-center gap-1.5 text-sm">
+                                Discuter sur WhatsApp <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <i class="fa-solid fa-location-dot text-accent-cyan text-lg w-6 flex-shrink-0"></i>
+                            <span class="text-sm">Casablanca, Maroc</span>
                         </div>
                     </div>
 
                     <!-- Social Icons Row -->
                     <div class="flex space-x-4 pt-6">
-                        <a href="#" class="hover-target w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition duration-300"><i class="fa-brands fa-github"></i></a>
-                        <a href="#" class="hover-target w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition duration-300"><i class="fa-brands fa-linkedin-in"></i></a>
-                        <a href="#" class="hover-target w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition duration-300"><i class="fa-brands fa-x-twitter"></i></a>
-                        <a href="#" class="hover-target w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition duration-300"><i class="fa-brands fa-dribbble"></i></a>
+                        <a href="https://github.com" target="_blank" class="hover-target w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition duration-300"><i class="fa-brands fa-github"></i></a>
+                        <a href="https://linkedin.com/in/ayoub-bensassi-003889250" target="_blank" class="hover-target w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition duration-300"><i class="fa-brands fa-linkedin-in"></i></a>
                     </div>
                 </div>
 
                 <!-- Contact Form Wrapper -->
-                <div class="lg:col-span-7 bg-slate-900/30 border border-slate-900 p-8 sm:p-10 rounded-3xl relative">
+                <div class="lg:col-span-7 bg-white dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 p-8 sm:p-10 rounded-3xl relative">
                     <form id="contact-form" onsubmit="handleContactSubmit(event)" class="space-y-6">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <!-- Name -->
                             <div class="space-y-2">
-                                <label for="name" class="text-sm font-semibold text-slate-300">Your Name</label>
-                                <input type="text" id="name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-primary-500 transition duration-300" placeholder="Jane Doe">
+                                <label for="name" class="text-sm font-semibold text-slate-700 dark:text-slate-300">Votre Nom</label>
+                                <input type="text" id="name" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500 transition duration-300" placeholder="Jean Dupont">
                             </div>
                             <!-- Email -->
                             <div class="space-y-2">
-                                <label for="email" class="text-sm font-semibold text-slate-300">Email Address</label>
-                                <input type="email" id="email" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-primary-500 transition duration-300" placeholder="jane@example.com">
+                                <label for="email" class="text-sm font-semibold text-slate-700 dark:text-slate-300">Adresse Email</label>
+                                <input type="email" id="email" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500 transition duration-300" placeholder="jean@example.com">
                             </div>
                         </div>
 
                         <!-- Subject -->
                         <div class="space-y-2">
-                            <label for="subject" class="text-sm font-semibold text-slate-300">Subject</label>
-                            <input type="text" id="subject" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-primary-500 transition duration-300" placeholder="Project collaboration proposal">
+                            <label for="subject" class="text-sm font-semibold text-slate-700 dark:text-slate-300">Sujet</label>
+                            <input type="text" id="subject" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500 transition duration-300" placeholder="Proposition de collaboration">
                         </div>
 
                         <!-- Message -->
                         <div class="space-y-2">
-                            <label for="message" class="text-sm font-semibold text-slate-300">Message</label>
-                            <textarea id="message" rows="5" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-primary-500 transition duration-300 resize-none" placeholder="Let's build something exceptional..."></textarea>
+                            <label for="message" class="text-sm font-semibold text-slate-700 dark:text-slate-300">Message</label>
+                            <textarea id="message" rows="5" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500 transition duration-300 resize-none" placeholder="Décrivez votre projet en détail..."></textarea>
                         </div>
 
-                        <!-- Submit Button -->
-                        <button type="submit" class="hover-target w-full bg-gradient-to-r from-primary-600 to-accent-pink hover:from-primary-700 hover:to-pink-600 text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-primary-600/20 transition duration-300 flex items-center justify-center gap-2">
-                            <span>Send Message</span>
-                            <i class="fa-regular fa-paper-plane"></i>
-                        </button>
+                        <!-- Submit Buttons (Email & WhatsApp) -->
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button type="submit" class="hover-target flex-1 bg-gradient-to-r from-primary-600 to-accent-pink hover:from-primary-700 hover:to-pink-600 text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-primary-600/20 transition duration-300 flex items-center justify-center gap-2">
+                                <span>Envoyer un Email</span>
+                                <i class="fa-regular fa-paper-plane"></i>
+                            </button>
+                            <a href="https://wa.me/212649460762?text=Bonjour%20Ayoub!%20Je%20souhaiterais%20échanger%20sur%20un%20projet%20de%20développement." target="_blank" class="hover-target bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-emerald-600/20 transition duration-300 flex items-center justify-center gap-2 text-center">
+                                <i class="fa-brands fa-whatsapp text-lg"></i>
+                                <span>WhatsApp Direct</span>
+                            </a>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Floating AI Tech Assistant Widget -->
+    <div id="ai-assistant-container" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <!-- Collapsed Bot Trigger Button -->
+        <button id="ai-trigger" onclick="toggleAIAssistant()" class="hover-target w-14 h-14 bg-gradient-to-tr from-primary-600 to-accent-pink rounded-full shadow-2xl flex items-center justify-center text-white text-xl transition hover:scale-110 active:scale-95 duration-200 animate-bounce">
+            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+        </button>
+
+        <!-- AI Chat Interface -->
+        <div id="ai-chatbox" class="hidden w-80 sm:w-96 h-[440px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden mb-4 transition-all">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-primary-600 via-indigo-600 to-accent-pink px-4 py-3.5 flex items-center justify-between shadow-md">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-display font-bold text-xs tracking-wider text-white font-mono uppercase">Gemini-Ayoub AI v2.0</span>
+                </div>
+                <button onclick="toggleAIAssistant()" class="text-white hover:opacity-80 text-xs"><i class="fa-solid fa-xmark text-sm"></i></button>
+            </div>
+
+            <div id="ai-neural-status" class="bg-slate-100 dark:bg-slate-950 px-4 py-1.5 border-b border-slate-200 dark:border-slate-850 flex items-center justify-between text-[9px] font-mono text-slate-500">
+                <span>Région active: Casablanca, MA</span>
+                <span class="flex items-center gap-1 animate-pulse"><i class="fa-solid fa-brain text-[10px] text-indigo-500"></i> Traitement Neuronal actif</span>
+            </div>
+
+            <!-- Chat Message log -->
+            <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-[11px] leading-normal text-slate-700 dark:text-slate-300">
+                <div class="bg-slate-100 dark:bg-slate-950/45 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/40">
+                    🤖 [SYSTEM ACTIVE]: Bonjour ! Je suis le conseiller cognitif d'Ayoub, optimisé par les technologies de modèles de langage de type Gemini. Comment puis-je vous aider ?
+                </div>
+            </div>
+
+            <!-- Typing indicator loader -->
+            <div id="ai-typing-indicator" class="hidden px-4 py-2 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></span>
+            </div>
+
+            <!-- Predefined commands buttons list -->
+            <div class="p-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 flex flex-wrap gap-1.5 font-sans">
+                <button onclick="sendAICommand('stack')" class="text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary-500 hover:text-primary-500 dark:hover:text-primary-400 px-2 py-1 rounded text-slate-500 dark:text-slate-400 font-mono">/getStack</button>
+                <button onclick="sendAICommand('exp')" class="text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary-500 hover:text-primary-500 dark:hover:text-primary-400 px-2 py-1 rounded text-slate-500 dark:text-slate-400 font-mono">/getParcours</button>
+                <button onclick="sendAICommand('status')" class="text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary-500 hover:text-primary-500 dark:hover:text-primary-400 px-2 py-1 rounded text-slate-500 dark:text-slate-400 font-mono">/statusActuel</button>
+                <button onclick="sendAICommand('game')" class="text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-400 px-2 py-1 rounded text-slate-500 dark:text-slate-400 font-mono">/jouerMorpion</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
-    <footer class="bg-slate-950 border-t border-slate-900 py-12">
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 py-12">
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <span class="font-display text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-pink">
                 AYOUB.BENSASSI
             </span>
-            <p class="text-slate-500 text-sm">
-                &copy; <span id="current-year">2026</span> AYOUB BENSASSI. Engineered beautifully.
+            <p class="text-slate-400 text-sm">
+                &copy; <span id="current-year">2026</span> Ayoub Bensassi. Tous droits réservés.
             </p>
             <div class="flex space-x-6">
-                <a href="#about" class="text-slate-500 hover:text-white text-sm transition">About</a>
-                <a href="#portfolio" class="text-slate-500 hover:text-white text-sm transition">Works</a>
-                <a href="#contact" class="text-slate-500 hover:text-white text-sm transition">Contact</a>
+                <a href="#about" class="text-slate-400 hover:text-slate-900 dark:hover:text-white text-sm transition">À propos</a>
+                <a href="#portfolio" class="text-slate-400 hover:text-slate-900 dark:hover:text-white text-sm transition">Projets</a>
+                <a href="#contact" class="text-slate-400 hover:text-slate-900 dark:hover:text-white text-sm transition">Contact</a>
             </div>
         </div>
     </footer>
 
     <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+    <div id="toast-container" class="fixed bottom-6 left-6 z-50 flex flex-col gap-3"></div>
 
     <!-- Javascript Engine & Logic -->
     <script>
+        // Theme Toggling Logic aligned with standard Tailwind class rules
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            const themeIcons = [document.getElementById('theme-icon'), document.getElementById('theme-icon-mobile')];
+
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcons.forEach(icon => {
+                    if (icon) icon.className = "fa-solid fa-sun text-amber-500";
+                });
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcons.forEach(icon => {
+                    if (icon) icon.className = "fa-solid fa-moon text-slate-400";
+                });
+            }
+        }
+
+        //        // Imagination Mode Cosmic Shifting Logic
+        let imaginationModeActive = false;
+
+        function toggleImaginationMode() {
+            imaginationModeActive = !imaginationModeActive;
+            const body = document.body;
+            const stardustCanvas = document.getElementById('stardust-canvas');
+            const icon = document.getElementById('imagination-icon');
+
+            if (imaginationModeActive) {
+                body.classList.add('imagination-active');
+                stardustCanvas.classList.remove('opacity-0');
+                icon.className = "fa-solid fa-wand-magic-sparkles text-pink-500 animate-spin";
+                showToast("🌌 Mode Rêve activé ! L'imagination prend le contrôle.", "success");
+                
+                // Accelerate and colorize Three.js particle systems
+                if (particleSystem && wireSphere) {
+                    wireSphere.material.color.setHex(0xec4899);
+                    particleSystem.material.size = 5.0;
+                }
+            } else {
+                body.classList.remove('imagination-active');
+                stardustCanvas.classList.add('opacity-0');
+                icon.className = "fa-solid fa-wand-magic-sparkles text-purple-600 dark:text-purple-400";
+                showToast("✨ Mode Standard restauré. Logique réinitialisée.", "success");
+                
+                // Reset Three.js values
+                if (particleSystem && wireSphere) {
+                    wireSphere.material.color.setHex(0x8b5cf6);
+                    particleSystem.material.size = 2.8;
+                }
+            }
+        }
+
+        //        // HTML5 Stardust trailing loop
+        (function initStardustTrail() {
+            const canvas = document.getElementById('stardust-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            window.addEventListener('mousemove', (e) => {
+                if (!imaginationModeActive) return;
+                // Spawn sparkling stardust particles
+                for (let i = 0; i < 3; i++) {
+                    particles.push({
+                        x: e.clientX,
+                        y: e.clientY,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: (Math.random() - 0.5) * 3 - 1, // slight upward float
+                        size: Math.random() * 5 + 2,
+                        alpha: 1,
+                        color: `hsl(${Math.random() * 360}, 90%, 70%)`
+                    });
+                }
+            });
+
+            // Touch support for mobile devices
+            window.addEventListener('touchmove', (e) => {
+                if (!imaginationModeActive || e.touches.length === 0) return;
+                const touch = e.touches[0];
+                for (let i = 0; i < 2; i++) {
+                    particles.push({
+                        x: touch.clientX,
+                        y: touch.clientY,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2 - 0.5,
+                        size: Math.random() * 4 + 2,
+                        alpha: 1,
+                        color: `hsl(${Math.random() * 360}, 90%, 70%)`
+                    });
+                }
+            });
+
+            function render() {
+                requestAnimationFrame(render);
+                if (!imaginationModeActive) {
+                    particles = [];
+                    return;
+                }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.alpha -= 0.02;
+
+                    if (p.alpha <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = p.color;
+
+                    // Draw miniature stars instead of normal circles
+                    ctx.beginPath();
+                    const spikes = 5;
+                    const outerRadius = p.size;
+                    const innerRadius = p.size / 2;
+                    let rot = Math.PI / 2 * 3;
+                    let x = p.x;
+                    let y = p.y;
+                    let step = Math.PI / spikes;
+
+                    ctx.moveTo(p.x, p.y - outerRadius);
+                    for (let j = 0; j < spikes; j++) {
+                        x = p.x + Math.cos(rot) * outerRadius;
+                        y = p.y + Math.sin(rot) * outerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+
+                        x = p.x + Math.cos(rot) * innerRadius;
+                        y = p.y + Math.sin(rot) * innerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+                    }
+                    ctx.lineTo(p.x, p.y - outerRadius);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+            render();
+        })();
+
+        // Apply saved theme on startup
+        (function applyInitialTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const html = document.documentElement;
+            const themeIcons = [document.getElementById('theme-icon'), document.getElementById('theme-icon-mobile')];
+
+            if (savedTheme === 'light') {
+                html.classList.remove('dark');
+                themeIcons.forEach(icon => {
+                    if (icon) icon.className = "fa-solid fa-sun text-amber-500";
+                });
+            } else {
+                html.classList.add('dark');
+                themeIcons.forEach(icon => {
+                    if (icon) icon.className = "fa-solid fa-moon text-slate-400";
+                });
+            }
+        })();
+
         // Set current year dynamic
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
@@ -674,7 +1371,6 @@
 
         // Loop animation for custom trailing effect (lerp interpolation)
         function animateCursor() {
-            // Speed factor
             const speed = 0.15;
             cursorX += (mouseX - cursorX) * speed;
             cursorY += (mouseY - cursorY) * speed;
@@ -685,6 +1381,118 @@
             requestAnimationFrame(animateCursor);
         }
         animateCursor();
+
+        // Dynamically track elements for mix-blend mode hover styles
+        const addHoverTargets = () => {
+            const hoverables = document.querySelectorAll('.hover-target, a, button, input, textarea');
+            hoverables.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    cursor.style.width = '45px';
+                    cursor.style.height = '45px';
+                    cursor.style.backgroundColor = 'rgba(139, 92, 246, 0.25)';
+                    cursor.style.borderColor = 'transparent';
+                });
+                item.addEventListener('mouseleave', () => {
+                    cursor.style.width = '20px';
+                    cursor.style.height = '20px';
+                    cursor.style.backgroundColor = 'transparent';
+                    cursor.style.borderColor = '#8b5cf6';
+                });
+            });
+        };
+        addHoverTargets();
+
+        // Command Palette Toggling
+        const commandPalette = document.getElementById('command-palette');
+        const paletteSearch = document.getElementById('palette-search');
+        
+        function toggleCommandPalette() {
+            commandPalette.classList.toggle('hidden');
+            if (!commandPalette.classList.contains('hidden')) {
+                paletteSearch.focus();
+                paletteSearch.value = "";
+                searchCommands();
+            }
+        }
+
+        // Keyboard Shortcut CMD/Ctrl + K or Escape to toggle command palette
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                toggleCommandPalette();
+            }
+            if (e.key === 'Escape' && !commandPalette.classList.contains('hidden')) {
+                toggleCommandPalette();
+            }
+        });
+
+        // Search Command filtering logic
+        const rawCommands = [
+            { text: "Aller à la section À propos", action: "nav-about", icon: "fa-user-ninja", category: "Navigation", color: "text-primary-500" },
+            { text: "Aller aux Graphiques Analytiques", action: "nav-skills", icon: "fa-sliders", category: "Navigation", color: "text-accent-pink" },
+            { text: "Aller aux Projets", action: "nav-works", icon: "fa-folder-open", category: "Navigation", color: "text-accent-cyan" },
+            { text: "Aller au parcours académique / pro", action: "nav-exp", icon: "fa-route", category: "Navigation", color: "text-yellow-500" },
+            { text: "Aller au Playground (Morpion)", action: "nav-playground", icon: "fa-gamepad", category: "Navigation", color: "text-emerald-500" },
+            { text: "Basculer le thème sombre / clair", action: "toggle-theme", icon: "fa-circle-half-stroke", category: "Paramètres Système", color: "text-yellow-500" },
+            { text: "Activer l'assistant AYOUB_BOT", action: "trigger-chat", icon: "fa-robot", category: "Paramètres Système", color: "text-emerald-400" }
+        ];
+
+        function searchCommands() {
+            const query = paletteSearch.value.toLowerCase().trim();
+            const resultsContainer = document.getElementById('palette-results');
+            resultsContainer.innerHTML = "";
+
+            // Group filtered items
+            const filtered = rawCommands.filter(cmd => cmd.text.toLowerCase().includes(query));
+
+            if (filtered.length === 0) {
+                resultsContainer.innerHTML = `<div class="text-sm text-slate-500 px-3 py-4 text-center">Aucun résultat correspondant.</div>`;
+                return;
+            }
+
+            // Group by category
+            const categories = [...new Set(filtered.map(item => item.category))];
+            categories.forEach(cat => {
+                resultsContainer.innerHTML += `<div class="text-xs font-semibold text-slate-400 px-3 py-2 uppercase tracking-wider mt-2">${cat}</div>`;
+                const catItems = filtered.filter(item => item.category === cat);
+                catItems.forEach(item => {
+                    resultsContainer.innerHTML += `
+                        <button onclick="runCommand('${item.action}')" class="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-primary-600/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition text-sm">
+                            <span><i class="fa-solid ${item.icon} w-6 ${item.color}"></i> ${item.text}</span>
+                            <span class="text-xs text-slate-400 font-mono">Sélectionner</span>
+                        </button>
+                    `;
+                });
+            });
+            addHoverTargets();
+        }
+
+        function runCommand(action) {
+            toggleCommandPalette();
+            if (action.startsWith('nav-')) {
+                const targetId = action.split('-')[1];
+                let anchor = targetId;
+                if (targetId === 'works') anchor = 'portfolio';
+                if (targetId === 'exp') anchor = 'experience';
+                document.getElementById(anchor).scrollIntoView({ behavior: 'smooth' });
+            } else if (action === 'toggle-theme') {
+                toggleTheme();
+            } else if (action === 'trigger-chat') {
+                const chat = document.getElementById('ai-chatbox');
+                if (chat.classList.contains('hidden')) {
+                    toggleAIAssistant();
+                }
+            }
+        }
+
+        // Live vitals simulations localizing to Moroccan GMT+1
+        function updateLiveVitals() {
+            // Local Time Casablanca
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Africa/Casablanca', timeZoneName: 'short' };
+            document.getElementById('vitals-time').textContent = new Date().toLocaleTimeString('fr-FR', options);
+        }
+        setInterval(updateLiveVitals, 1000);
+        updateLiveVitals();
 
         // Reveal animations trigger on scroll
         function revealElements() {
@@ -700,18 +1508,17 @@
             });
         }
         window.addEventListener('scroll', revealElements);
-        // Initial call
         window.addEventListener('load', revealElements);
 
         // Header Background change on scroll
         const header = document.getElementById('header');
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('bg-slate-950/95');
-                header.classList.remove('bg-slate-950/70');
+            if (window.scrollY > 30) {
+                header.classList.add('shadow-md', 'bg-white/95', 'dark:bg-slate-950/95', 'h-16');
+                header.classList.remove('bg-white/80', 'dark:bg-slate-950/80', 'h-20');
             } else {
-                header.classList.add('bg-slate-950/70');
-                header.classList.remove('bg-slate-950/95');
+                header.classList.add('bg-white/80', 'dark:bg-slate-950/80', 'h-20');
+                header.classList.remove('shadow-md', 'bg-white/95', 'dark:bg-slate-950/95', 'h-16');
             }
         });
 
@@ -723,9 +1530,9 @@
         function toggleMenu() {
             mobileMenu.classList.toggle('hidden');
             if (mobileMenu.classList.contains('hidden')) {
-                menuIcon.className = 'fa-solid fa-bars text-2xl';
+                menuIcon.className = 'fa-solid fa-bars text-sm';
             } else {
-                menuIcon.className = 'fa-solid fa-xmark text-2xl';
+                menuIcon.className = 'fa-solid fa-xmark text-sm';
             }
         }
         mobileToggle.addEventListener('click', toggleMenu);
@@ -735,15 +1542,13 @@
             const items = document.querySelectorAll('.portfolio-item');
             const buttons = document.querySelectorAll('.filter-btn');
 
-            // Active State change for buttons
             buttons.forEach(btn => {
                 btn.classList.remove('active', 'bg-primary-600', 'text-white');
-                btn.classList.add('text-slate-400', 'hover:text-white');
+                btn.classList.add('text-slate-500', 'hover:text-slate-900', 'dark:text-slate-400', 'dark:hover:text-white');
             });
 
-            // Find current clicked button and highlight
             event.target.classList.add('active', 'bg-primary-600', 'text-white');
-            event.target.classList.remove('text-slate-400', 'hover:text-white');
+            event.target.classList.remove('text-slate-500', 'hover:text-slate-900', 'dark:text-slate-400', 'dark:hover:text-white');
 
             items.forEach(item => {
                 if (category === 'all' || item.classList.contains(category)) {
@@ -762,32 +1567,385 @@
             });
         }
 
-        // Custom notification system (To avoid native alerts)
+        // --- TIC-TAC-TOE (MORPION) GAME LOGIC ---
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X'; 
+        let gameActive = true;
+        let gameMode = 'ai'; 
+        let aiDifficulty = 'smart'; 
+        let scores = { player: 0, ties: 0, opponent: 0 };
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], 
+            [0, 4, 8], [2, 4, 6]             
+        ];
+
+        const cells = document.querySelectorAll('.game-cell');
+        const statusDisplay = document.getElementById('game-status');
+
+        function updateScoreboard() {
+            document.getElementById('score-player').textContent = scores.player;
+            document.getElementById('score-ties').textContent = scores.ties;
+            document.getElementById('score-opponent').textContent = scores.opponent;
+        }
+
+        function setGameMode(mode) {
+            gameMode = mode;
+            const aiBtn = document.getElementById('mode-ai');
+            const pvpBtn = document.getElementById('mode-pvp');
+            const diffWrapper = document.getElementById('difficulty-wrapper');
+            const opponentTitle = document.getElementById('score-opponent-title');
+
+            if (mode === 'ai') {
+                aiBtn.className = "hover-target flex items-center justify-center gap-2 py-2.5 rounded-xl border font-semibold text-xs uppercase tracking-wide transition-all duration-300 bg-primary-600 border-primary-500 text-white shadow-md";
+                pvpBtn.className = "hover-target flex items-center justify-center gap-2 py-2.5 rounded-xl border font-semibold text-xs uppercase tracking-wide transition-all duration-300 bg-transparent border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400";
+                diffWrapper.classList.remove('hidden');
+                opponentTitle.textContent = "IA";
+            } else {
+                pvpBtn.className = "hover-target flex items-center justify-center gap-2 py-2.5 rounded-xl border font-semibold text-xs uppercase tracking-wide transition-all duration-300 bg-primary-600 border-primary-500 text-white shadow-md";
+                aiBtn.className = "hover-target flex items-center justify-center gap-2 py-2.5 rounded-xl border font-semibold text-xs uppercase tracking-wide transition-all duration-300 bg-transparent border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400";
+                diffWrapper.classList.add('hidden');
+                opponentTitle.textContent = "Joueur 2";
+            }
+            resetGameBoard(false);
+        }
+
+        function setDifficulty(diff) {
+            aiDifficulty = diff;
+            const easyBtn = document.getElementById('diff-easy');
+            const smartBtn = document.getElementById('diff-smart');
+
+            if (diff === 'easy') {
+                easyBtn.className = "hover-target py-2 rounded-xl border font-semibold text-[10px] uppercase tracking-wide transition-all duration-300 bg-primary-600 border-primary-500 text-white shadow-md";
+                smartBtn.className = "hover-target py-2 rounded-xl border font-semibold text-[10px] uppercase tracking-wide transition-all duration-300 bg-transparent border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400";
+            } else {
+                smartBtn.className = "hover-target py-2 rounded-xl border font-semibold text-[10px] uppercase tracking-wide transition-all duration-300 bg-primary-600 border-primary-500 text-white shadow-md";
+                easyBtn.className = "hover-target py-2 rounded-xl border font-semibold text-[10px] uppercase tracking-wide transition-all duration-300 bg-transparent border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400";
+            }
+            resetGameBoard(false);
+        }
+
+        function makePlayerMove(index) {
+            if (board[index] !== '' || !gameActive) return;
+
+            executeMove(index, currentPlayer);
+
+            if (checkWin(board, currentPlayer)) {
+                handleGameOver('win', currentPlayer);
+                return;
+            }
+
+            if (checkDraw(board)) {
+                handleGameOver('draw');
+                return;
+            }
+
+            if (gameMode === 'ai') {
+                currentPlayer = 'O';
+                statusDisplay.textContent = "L'IA réfléchit...";
+                gameActive = false; 
+                setTimeout(makeAIMove, 500);
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                statusDisplay.textContent = `C'est au tour de ${currentPlayer} !`;
+            }
+        }
+        // Reset Board Button
+        function resetGameBoard(clearScores = false) {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            statusDisplay.textContent = "C'est à votre tour ! (X)";
+
+            cells.forEach(cell => {
+                cell.innerHTML = '';
+                cell.className = "hover-target game-cell flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200 focus:outline-none";
+            });
+
+            if (clearScores) {
+                scores = { player: 0, ties: 0, opponent: 0 };
+                updateScoreboard();
+                showToast("Scores réinitialisés ! En garde.", "success");
+            }
+            addHoverTargets();
+        }
+
+        //        // Switch between Morpion Game, Gemini Code Sandbox, and Dream Laboratory Tabs
+        function switchPlaygroundTab(tabId) {
+            const gameContent = document.getElementById('playground-game-content');
+            const sandboxContent = document.getElementById('playground-sandbox-content');
+            const dreamContent = document.getElementById('playground-dream-content');
+            
+            const gameBtn = document.getElementById('tab-game-btn');
+            const sandboxBtn = document.getElementById('tab-sandbox-btn');
+            const dreamBtn = document.getElementById('tab-dream-btn');
+
+            // Hide all
+            gameContent.classList.add('hidden');
+            sandboxContent.classList.add('hidden');
+            dreamContent.classList.add('hidden');
+
+            gameBtn.className = "flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400 bg-transparent";
+            sandboxBtn.className = "flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400 bg-transparent";
+            dreamBtn.className = "flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400 bg-transparent";
+
+            if (tabId === 'game-tab') {
+                gameContent.classList.remove('hidden');
+                gameBtn.className = "flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-850 text-slate-900 dark:text-white shadow";
+            } else if (tabId === 'sandbox-tab') {
+                sandboxContent.classList.remove('hidden');
+                sandboxBtn.className = "flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-850 text-slate-900 dark:text-white shadow";
+            } else if (tabId === 'dream-tab') {
+                dreamContent.classList.remove('hidden');
+                dreamBtn.className = "flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-850 text-slate-900 dark:text-white shadow";
+                initDreamBlueprintCanvas();
+            }
+            addHoverTargets();
+        }
+
+        // Interactive Gemini AI Code Simulation
+        const mockCodeData = {
+            'api-laravel': `<?php\n\nnamespace App\\Http\\Controllers;\n\nuse App\\Models\\Article;\nuse Illuminate\\Http\\Request;\n\nclass ArticleController extends Controller\n{\n    // Généré par Gemini Pro pour Ayoub Bensassi - Label'Vie Sync\n    public function index()\n    {\n        return response()->json(Article::with('fournisseur')->paginate(15));\n    }\n\n    public function store(Request $request)\n    {\n        $validated = $request->validate([\n            'designation' => 'required|string|max:255',\n            'prix_achat' => 'required|numeric|min:0',\n            'prix_vente' => 'required|numeric|gt:prix_achat',\n            'fournisseur_id' => 'required|exists:fournisseurs,id'\n        ]);\n\n        $article = Article::create($validated);\n        return response()->json($article, 212);\n    }\n}`,
+            'react-hooks': `import { useState, useEffect } from 'react';\n\n// Custom React Hook développé par Ayoub Bensassi\nexport function useStockManager(initialStock = []) {\n    const [stock, setStock] = useState(initialStock);\n    const [loading, setLoading] = useState(false);\n\n    const dispatchStockUpdate = async (itemCode, deltaQuantity) => {\n        setLoading(true);\n        try {\n            // Simulation d'une mise à jour vers le système Joël Robuchon\n            setStock(prev => prev.map(item => \n                item.code === itemCode \n                    ? { ...item, quantity: Math.max(0, item.quantity + deltaQuantity) }\n                    : item\n            ));\n        } finally {\n            setLoading(false);\n        }\n    };\n\n    return { stock, dispatchStockUpdate, loading };\n}`,
+            'sql-schema': `-- Analyse de la cohérence et marge bénéficiaire brute (Ayoub Bensassi)\nSELECT \n    a.id AS article_id,\n    a.designation,\n    f.nom AS nom_fournisseur,\n    a.prix_achat,\n    a.prix_vente,\n    (a.prix_vente - a.prix_achat) AS marge_brute,\n    ROUND(((a.prix_vente - a.prix_achat) / a.prix_vente) * 100, 2) AS pourcentage_marge\nFROM articles a\nINNER JOIN fournisseurs f ON a.fournisseur_id = f.id\nWHERE a.statut = 'actif'\nORDER BY pourcentage_marge DESC;`
+        };
+
+        let currentActiveCode = "";
+        let isCodeStreaming = false;
+
+        function generateSandboxCode(promptId) {
+            if (isCodeStreaming) return;
+            isCodeStreaming = true;
+
+            const terminal = document.getElementById('sandbox-code-terminal');
+            const statusText = document.getElementById('sandbox-status-txt');
+            const rawCodeText = mockCodeData[promptId];
+            
+            currentActiveCode = rawCodeText;
+            terminal.textContent = "";
+            statusText.textContent = "Génération de jetons cognitifs...";
+
+            let charIndex = 0;
+            const typingInterval = setInterval(() => {
+                if (charIndex < rawCodeText.length) {
+                    terminal.textContent += rawCodeText.charAt(charIndex);
+                    charIndex++;
+                    terminal.scrollTop = terminal.scrollHeight;
+                } else {
+                    clearInterval(typingInterval);
+                    isCodeStreaming = false;
+                    statusText.textContent = "Génération terminée avec succès !";
+                    showToast("Code généré par Gemini ! ✨", "success");
+                }
+            }, 8); 
+        }
+
+        //        // Dream Laboratory Concept list & generator loop
+        const dreamConcepts = [
+            {
+                cat: "[ECO-COMPUTING]",
+                title: "Réseau Solaire Flottant Sidi Abderrahmane",
+                desc: "Un centre de micro-données autonome ancré au large de Casablanca. Il s'auto-refroidit à l'aide des courants marins et est entièrement propulsé par des verres photovoltaïques organiques biodégradables.",
+                utopia: "94%",
+                throughput: "2.4 EB/s",
+                wow: "Ultra"
+            },
+            {
+                cat: "[BIOMIMETICS]",
+                title: "Circadian Bio-CSS Framework",
+                desc: "Une bibliothèque front-end qui compile dynamiquement des palettes d'interfaces adaptatives, se synchronisant avec les variations de luminosité de Casablanca et le cycle circadien naturel de l'utilisateur.",
+                utopia: "87%",
+                throughput: "140 BPM",
+                wow: "Élevé"
+            },
+            {
+                cat: "[COGNITIVE-API]",
+                title: "Synaptic Laravel Micro-Router",
+                desc: "Une extension d'acheminement de requêtes back-end qui utilise des algorithmes de cheminement neuronaux organiques pour auto-guérir et ré-optimiser les pipelines d'APIs en temps réel.",
+                utopia: "91%",
+                throughput: "1.2 ms",
+                wow: "Cosmique"
+            }
+        ];
+
+        let dreamIndex = 0;
+        let dreamDrawingInterval = null;
+
+        function initDreamBlueprintCanvas() {
+            const canvas = document.getElementById('dream-blueprint-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            if (dreamDrawingInterval) clearInterval(dreamDrawingInterval);
+
+            // Simple procedurally animated blueprints
+            let rotation = 0;
+            dreamDrawingInterval = setInterval(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = imaginationModeActive ? '#ec4899' : '#06b6d4';
+                ctx.lineWidth = 1;
+
+                // Center coordinates
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+
+                // Pulsating orbit ring
+                ctx.beginPath();
+                ctx.arc(cx, cy, 60 + Math.sin(rotation) * 10, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Rotating star coordinates
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate(rotation);
+                ctx.beginPath();
+                for (let i = 0; i < 4; i++) {
+                    ctx.rotate(Math.PI / 2);
+                    ctx.moveTo(0, -40);
+                    ctx.lineTo(0, 40);
+                    ctx.moveTo(-40, 0);
+                    ctx.lineTo(40, 0);
+                }
+                ctx.stroke();
+                ctx.restore();
+
+                rotation += 0.02;
+            }, 30);
+        }
+
+        function generateDreamConcept() {
+            const blueprintStatus = document.getElementById('dream-blueprint-status');
+            blueprintStatus.textContent = "Matérialisation...";
+            showToast("Matérialisation du concept onirique... ✨", "success");
+
+            // Typewriting effect for descriptions
+            const activeConcept = dreamConcepts[dreamIndex];
+            dreamIndex = (dreamIndex + 1) % dreamConcepts.length;
+
+            document.getElementById('dream-cat').textContent = activeConcept.cat;
+            document.getElementById('dream-title').textContent = activeConcept.title;
+
+            const descText = activeConcept.desc;
+            const descContainer = document.getElementById('dream-desc');
+            descContainer.textContent = "";
+
+            let charIdx = 0;
+            const textTimer = setInterval(() => {
+                if (charIdx < descText.length) {
+                    descContainer.textContent += descText.charAt(charIdx);
+                    charIdx++;
+                } else {
+                    clearInterval(textTimer);
+                    blueprintStatus.textContent = "Concept Alignée";
+                    // Load statistics
+                    document.getElementById('dream-stat-utopia').textContent = activeConcept.utopia;
+                    document.getElementById('dream-stat-throughput').textContent = activeConcept.throughput;
+                    document.getElementById('dream-stat-wow').textContent = activeConcept.wow;
+                }
+            }, 15);
+        }
+
+        function copySandboxCode() {
+            if (!currentActiveCode) {
+                showToast("Rien à copier !", "error");
+                return;
+            }
+            const dummyArea = document.createElement('textarea');
+            dummyArea.value = currentActiveCode;
+            document.body.appendChild(dummyArea);
+            dummyArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummyArea);
+            showToast("Code copié dans le presse-papiers !", "success");
+        }
+
+        // Floating AI Assistant toggles
+        const aiChatbox = document.getElementById('ai-chatbox');
+        const aiTrigger = document.getElementById('ai-trigger');
+        
+        function toggleAIAssistant() {
+            aiChatbox.classList.toggle('hidden');
+            if(!aiChatbox.classList.contains('hidden')) {
+                aiTrigger.innerHTML = '<i class="fa-solid fa-message"></i>';
+                aiTrigger.classList.remove('animate-bounce');
+            } else {
+                aiTrigger.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles text-lg"></i>';
+                aiTrigger.classList.add('animate-bounce');
+            }
+        }
+
+        let isAssistantTyping = false;
+
+        function sendAICommand(cmd) {
+            if (isAssistantTyping) return;
+
+            const chatMessages = document.getElementById('ai-chat-messages');
+            const typingIndicator = document.getElementById('ai-typing-indicator');
+            let responseText = "";
+
+            if (cmd === 'stack') {
+                responseText = "🔧 [TECHNOLOGIES D'AYOUB]: HTML5, CSS3, JavaScript, React.js pour le front-end. Laravel, PHP, MySQL pour le back-end et les bases de données. Git/GitHub pour la collaboration.";
+            } else if (cmd === 'exp') {
+                responseText = "🎓 [PARCOURS]: ISTA Casablanca (Technicien Spécialisé Développement Web Full Stack) et Lycée Ibn Toumert (Bac physique). Côté pro: Développeur chez wib.co, Administration de BDD chez Label'Vie et gestion logistique chez Joël Robuchon.";
+            } else if (cmd === 'status') {
+                responseText = `🟢 [STATUT]: Disponible pour des propositions de collaboration en tant que Développeur Full Stack (sur site à Casablanca, hybride ou télétravail).`;
+            } else if (cmd === 'game') {
+                responseText = `🎮 [MORPION]: Envie de jouer ? Faites défiler jusqu'à la section "Playground" ou <a href="#playground" class="underline text-indigo-400 font-bold" onclick="toggleAIAssistant()">cliquez ici</a> pour lancer une partie contre moi !`;
+            }
+
+            chatMessages.innerHTML += `
+                <div class="text-[10px] text-slate-400 mt-2 text-right">👉 /get${cmd.charAt(0).toUpperCase() + cmd.slice(1)}</div>
+            `;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            typingIndicator.classList.remove('hidden');
+            isAssistantTyping = true;
+
+            setTimeout(() => {
+                typingIndicator.classList.add('hidden');
+                
+                const bubbleElement = document.createElement('div');
+                bubbleElement.className = "bg-primary-600/15 border border-primary-500/20 p-2.5 rounded-xl mt-1 text-slate-800 dark:text-slate-200 font-mono";
+                chatMessages.appendChild(bubbleElement);
+
+                let charIndex = 0;
+                const typingTimer = setInterval(() => {
+                    if (charIndex < responseText.length) {
+                        bubbleElement.innerHTML += responseText.charAt(charIndex);
+                        charIndex++;
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    } else {
+                        clearInterval(typingTimer);
+                        isAssistantTyping = false;
+                    }
+                }, 10);
+            }, 800);
+        }
+
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             
-            // Layout styling
             toast.className = `flex items-center gap-3 px-5 py-4 rounded-xl border shadow-2xl transition duration-500 transform translate-y-10 opacity-0 ${
                 type === 'success' 
-                ? 'bg-slate-900 border-emerald-500/30 text-emerald-400' 
-                : 'bg-slate-900 border-red-500/30 text-red-400'
+                ? 'bg-white dark:bg-slate-900 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' 
+                : 'bg-white dark:bg-slate-900 border-red-500/30 text-red-600 dark:text-red-400'
             }`;
 
             const iconClass = type === 'success' ? 'fa-regular fa-circle-check' : 'fa-solid fa-circle-exclamation';
             toast.innerHTML = `
                 <i class="${iconClass} text-lg"></i>
-                <div class="text-sm font-medium text-slate-100">${message}</div>
+                <div class="text-sm font-medium text-slate-900 dark:text-slate-100">${message}</div>
             `;
 
             container.appendChild(toast);
 
-            // Animate transition
             setTimeout(() => {
                 toast.classList.remove('translate-y-10', 'opacity-0');
             }, 10);
 
-            // Remove timeout
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => {
@@ -796,22 +1954,220 @@
             }, 4000);
         }
 
-        // Functional Contact Submission Logic
         function handleContactSubmit(event) {
             event.preventDefault();
-            
-            // Select Inputs
             const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const subject = document.getElementById('subject').value;
-            const message = document.getElementById('message').value;
-
-            // Trigger success toast
-            showToast(`Thank you, ${name}! Your proposal has been sent successfully.`);
-
-            // Reset form
+            showToast(`Merci ${name}, votre message a bien été envoyé ! Je vous répondrai au plus vite.`);
             document.getElementById('contact-form').reset();
         }
+
+        /* --- THREE.JS INTERACTIVE 3D DATA CONSTELLATION CORE --- */
+        let scene, camera, renderer, particleSystem, wireSphere;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let targetRotation = { x: 0, y: 0 };
+
+        function initThreeDGraphic() {
+            const container = document.getElementById('cognitive-canvas').parentElement;
+            const canvas = document.getElementById('cognitive-canvas');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Initialize Scene
+            scene = new THREE.Scene();
+
+            // Initialize Camera
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+            camera.position.z = 250;
+
+            // Initialize Renderer
+            renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Create Group to hold the assets and manipulate rotation
+            const coreGroup = new THREE.Group();
+            scene.add(coreGroup);
+
+            // 1. Core Glowing Wireframe Sphere (Generating simple shapes)
+            const sphereGeom = new THREE.IcosahedronGeometry(45, 2);
+            const sphereMat = new THREE.MeshBasicMaterial({
+                color: 0x8b5cf6,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.25
+            });
+            wireSphere = new THREE.Mesh(sphereGeom, sphereMat);
+            coreGroup.add(wireSphere);
+
+            // 2. Interactive Outer Particle System Constellation
+            const particleCount = 280;
+            const particleGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            const colorPurple = new THREE.Color('#8b5cf6');
+            const colorPink = new THREE.Color('#ec4899');
+            const colorCyan = new THREE.Color('#06b6d4');
+
+            for (let i = 0; i < particleCount; i++) {
+                // Sphere math distribution
+                const u = Math.random();
+                const v = Math.random();
+                const theta = u * 2.0 * Math.PI;
+                const phi = Math.acos(2.0 * v - 1.0);
+                const r = 50 + Math.random() * 40; // orbiting distance
+
+                positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = r * Math.cos(phi);
+
+                // Blend random gradients mirroring Gemini UI
+                let mixColor = colorPurple;
+                const rand = Math.random();
+                if (rand > 0.6) mixColor = colorPink;
+                else if (rand > 0.3) mixColor = colorCyan;
+
+                colors[i * 3] = mixColor.r;
+                colors[i * 3 + 1] = mixColor.g;
+                colors[i * 3 + 2] = mixColor.b;
+            }
+
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            // Create circular particle shader texture programmatically (No Loader URL rules)
+            const pCanvas = document.createElement('canvas');
+            pCanvas.width = 16;
+            pCanvas.height = 16;
+            const pCtx = pCanvas.getContext('2d');
+            const pGrad = pCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
+            pGrad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            pGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            pCtx.fillStyle = pGrad;
+            pCtx.fillRect(0, 0, 16, 16);
+            
+            const pTexture = new THREE.CanvasTexture(pCanvas);
+
+            const particleMaterial = new THREE.PointsMaterial({
+                size: 2.8,
+                map: pTexture,
+                transparent: true,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+            coreGroup.add(particleSystem);
+
+            /* --- DRAG INTERACTION EVENT LISTENERS --- */
+            const interactionHint = document.getElementById('canvas-interaction-hint');
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+                interactionHint.textContent = "Interactivité: Pivotement actif";
+                interactionHint.className = "block text-[10px] text-emerald-400 font-bold";
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    interactionHint.textContent = "Glissez pour pivoter la caméra";
+                    interactionHint.className = "block text-[10px] text-indigo-400 font-bold";
+                }
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                const deltaMove = {
+                    x: e.clientX - previousMousePosition.x,
+                    y: e.clientY - previousMousePosition.y
+                };
+
+                if (isDragging) {
+                    targetRotation.y += deltaMove.x * 0.005;
+                    targetRotation.x += deltaMove.y * 0.005;
+                } else {
+                    // Soft parallax tilt on hover
+                    const rect = canvas.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                    const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                    targetRotation.y = x * 0.3;
+                    targetRotation.x = -y * 0.3;
+                }
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            // Handle touch interactions for mobile viewports
+            canvas.addEventListener('touchstart', (e) => {
+                if(e.touches.length === 1) {
+                    isDragging = true;
+                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+            });
+
+            canvas.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if(isDragging && e.touches.length === 1) {
+                    const deltaMove = {
+                        x: e.touches[0].clientX - previousMousePosition.x,
+                        y: e.touches[0].clientY - previousMousePosition.y
+                    };
+                    targetRotation.y += deltaMove.x * 0.008;
+                    targetRotation.x += deltaMove.y * 0.008;
+                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+            });
+
+            // Adjust viewport on screen resize
+            window.addEventListener('resize', () => {
+                const newWidth = container.clientWidth;
+                const newHeight = container.clientHeight;
+                camera.aspect = newWidth / newHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(newWidth, newHeight);
+            });
+
+            //            /* --- RENDER LOOP ANIMATION --- */
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Speed factor based on Imagination Mode
+                const speedModifier = imaginationModeActive ? 4.0 : 1.0;
+
+                // Smoothly interpolation rotate groups based on dragging physics (lerp)
+                coreGroup.rotation.y += (targetRotation.y - coreGroup.rotation.y) * 0.08 * speedModifier;
+                coreGroup.rotation.x += (targetRotation.x - coreGroup.rotation.x) * 0.08 * speedModifier;
+
+                // Continuous default idle spinning
+                wireSphere.rotation.y += 0.002 * speedModifier;
+                wireSphere.rotation.x += 0.001 * speedModifier;
+                particleSystem.rotation.y -= 0.0015 * speedModifier;
+
+                // Pulse core scaling over time
+                const time = Date.now() * (imaginationModeActive ? 0.004 : 0.0015);
+                const scaleValue = 1 + Math.sin(time) * (imaginationModeActive ? 0.15 : 0.05);
+                wireSphere.scale.set(scaleValue, scaleValue, scaleValue);
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+
+        // Initialize 3D Graphic on complete page load
+        window.onload = function() {
+            initThreeDGraphic();
+        };
     </script>
 </body>
 </html>
